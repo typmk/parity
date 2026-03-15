@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
-# par — Clojure Parity Toolkit
 set -euo pipefail
 cd "$(dirname "$0")"
-exec clojure -M src/parity/core.clj "$@"
+
+# Use :contrib alias only when not --lang
+if echo "$@" | grep -q -- "--lang"; then
+  exec clojure -M src/parity/core.clj "$@"
+else
+  exec clojure -M:contrib src/parity/core.clj "$@"
+fi
