@@ -288,7 +288,7 @@
                  (test-impl (first cmd-args))
                  (do (println "Usage: par test <results.edn>") (System/exit 1)))
       "status" (apply status cmd-args)
-      "port"   (load-and-call "src/parity/portabilize.clj" (first cmd-args) (second cmd-args))
+      "port"   (load-and-call "src/parity/port.clj" (first cmd-args) (second cmd-args))
       "clear"  (clear)
       (usage))))
 

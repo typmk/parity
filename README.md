@@ -120,7 +120,7 @@ src/parity/
     roots.clj            Native primitives — JVM host contract (reflection)
     branch.clj           Dependency chains — source graph (rewrite-clj)
     tree.clj             The merge — prioritized implementation roadmap
-  portabilize.clj       JVM -> portable rewriter (driven by roots reflection)
+  port.clj              JVM -> portable rewriter (driven by roots reflection)
   color.clj             ANSI terminal helpers
 lang/                   Generated: shipped Clojure specs (gitignored)
 contrib/                Generated: contrib library specs (gitignored)
