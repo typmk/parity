@@ -117,9 +117,9 @@ src/parity/
   specgen.clj           JVM reflection -> test specs (.edn)
   generate.clj          Expand specs, capture JVM reference
   analyze.clj           Coordinator: reflect, deps, roadmap
-    langmap.clj          JVM host contract (reflection)
-    depgraph.clj         Source dependency graph (rewrite-clj)
-    tree.clj             Merge deps + host -> roadmap
+    roots.clj            Native primitives — JVM host contract (reflection)
+    branch.clj           Dependency chains — source graph (rewrite-clj)
+    tree.clj             The merge — prioritized implementation roadmap
   portabilize.clj       JVM -> portable rewriter (experimental)
   color.clj             ANSI terminal helpers
 lang/                   Generated: shipped Clojure specs (gitignored)

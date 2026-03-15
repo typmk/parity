@@ -18,12 +18,12 @@
 (defn reflect
   "JVM host contract: what interfaces, methods, types Clojure requires."
   [& args]
-  (apply load-and-call "src/parity/analyze/langmap.clj" (or args [])))
+  (apply load-and-call "src/parity/analyze/roots.clj" (or args [])))
 
 (defn deps
   "Source-level dependency graph from Clojure .clj files."
   [& args]
-  (apply load-and-call "src/parity/analyze/depgraph.clj" args))
+  (apply load-and-call "src/parity/analyze/branch.clj" args))
 
 (defn roadmap
   "What to implement next. Merges source deps + JVM host contract."
@@ -32,9 +32,9 @@
         tmp-host  (java.io.File/createTempFile "parity-host" ".edn")]
     (try
       (spit tmp-graph (with-out-str
-                        (load-and-call "src/parity/analyze/depgraph.clj" clojure-src "--edn")))
+                        (load-and-call "src/parity/analyze/branch.clj" clojure-src "--edn")))
       (spit tmp-host (with-out-str
-                       (load-and-call "src/parity/analyze/langmap.clj" "--edn")))
+                       (load-and-call "src/parity/analyze/roots.clj" "--edn")))
       (apply load-and-call "src/parity/analyze/tree.clj"
              (str tmp-graph) (str tmp-host) args)
       (finally
