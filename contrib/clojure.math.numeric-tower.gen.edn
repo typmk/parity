@@ -12,8 +12,8 @@
    :template "(clojure.math.numeric-tower/exact-integer-sqrt %n)"}
   {:describe "expt",
    :params
-   {:base ["nil" "true" "0" "1" "-1"],
-    :pow ["nil" "true" "0" "1" "-1"]},
+   {:base ["nil" "true" "false" "0" "1"],
+    :pow ["nil" "true" "false" "0" "1"]},
    :template "(clojure.math.numeric-tower/expt %base %pow)"}
   {:describe "floor",
    :params {:n ["0" "1" "-1" "42" "3.14"]},
@@ -36,6 +36,6 @@
    :params {:n ["0" "1" "-1" "42" "3.14"]},
    :template "(clojure.math.numeric-tower/sqrt %n)"}
   {:describe "when-available",
-   :params {:sym ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:sym ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.math.numeric-tower/when-available %sym)"}]}
 ]

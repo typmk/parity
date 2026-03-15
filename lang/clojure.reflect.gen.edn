@@ -3,22 +3,21 @@
  :parametric
  [{:describe "do-reflect",
    :params
-   {:reflector ["nil" "true" "0" "1" "-1"],
-    :typeref ["nil" "true" "0" "1" "-1"]},
+   {:reflector ["nil" "true" "false" "0" "1"],
+    :typeref ["nil" "true" "false" "0" "1"]},
    :template "(clojure.reflect/do-reflect %reflector %typeref)"}
   {:describe "reflect",
-   :params {:obj ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:obj ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.reflect/reflect %obj)"}
   {:describe "resolve-class",
    :params
-   {:this ["nil" "true" "0" "1" "-1"],
-    :name ["nil" "true" "0" "1" "-1"]},
+   {:this ["nil" "true" "false" "0" "1"],
+    :name ["nil" "true" "false" "0" "1"]},
    :template "(clojure.reflect/resolve-class %this %name)"}
   {:describe "type-reflect",
-   :params
-   {:typeref ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:typeref ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.reflect/type-reflect %typeref)"}
   {:describe "typename",
-   :params {:o ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:o ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.reflect/typename %o)"}]}
 ]

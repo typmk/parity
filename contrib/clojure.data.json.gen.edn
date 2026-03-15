@@ -6,22 +6,22 @@
  :parametric
  [{:describe "-write",
    :params
-   {:object ["nil" "true" "0"],
-    :out ["nil" "true" "0"],
-    :options ["nil" "true" "0"]},
+   {:object ["nil" "true" "false"],
+    :out ["nil" "true" "false"],
+    :options ["nil" "true" "false"]},
    :template "(clojure.data.json/-write %object %out %options)"}
   {:describe "json-str",
    :params {:x ["0" "1" "-1" "42" "3.14"]},
    :template "(clojure.data.json/json-str %x)"}
   {:describe "on-extra-throw",
    :params
-   {:val ["nil" "true" "0" "1" "-1"],
-    :rdr ["nil" "true" "0" "1" "-1"]},
+   {:val ["nil" "true" "false" "0" "1"],
+    :rdr ["nil" "true" "false" "0" "1"]},
    :template "(clojure.data.json/on-extra-throw %val %rdr)"}
   {:describe "on-extra-throw-remaining",
    :params
-   {:val ["nil" "true" "0" "1" "-1"],
-    :rdr ["nil" "true" "0" "1" "-1"]},
+   {:val ["nil" "true" "false" "0" "1"],
+    :rdr ["nil" "true" "false" "0" "1"]},
    :template "(clojure.data.json/on-extra-throw-remaining %val %rdr)"}
   {:describe "pprint",
    :params {:x ["0" "1" "-1" "42" "3.14"]},
@@ -33,26 +33,25 @@
    :params {:x ["0" "1" "-1" "42" "3.14"]},
    :template "(clojure.data.json/print-json %x)"}
   {:describe "read",
-   :params
-   {:reader ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:reader ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.data.json/read %reader)"}
   {:describe "read-json",
-   :params
-   {:input ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:input ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.data.json/read-json %input)"}
   {:describe "read-str",
-   :params {:string ["\"\"" "\"hello\"" "\"hello world\"" "\"abc\""]},
+   :params
+   {:string ["\"\"" "\"hello\"" "\"hello world\"" "\"abc\"" "\"\""]},
    :template "(clojure.data.json/read-str %string)"}
   {:describe "write",
    :params
    {:x ["0" "1" "-1" "42" "3.14"],
-    :writer ["nil" "true" "0" "1" "-1"]},
+    :writer ["nil" "true" "false" "0" "1"]},
    :template "(clojure.data.json/write %x %writer)"}
   {:describe "write-json",
    :params
    {:x ["0" "1" "-1"],
-    :out ["nil" "true" "0"],
-    :escape-unicode? ["nil" "true" "0"]},
+    :out ["nil" "true" "false"],
+    :escape-unicode? ["nil" "true" "false"]},
    :template "(clojure.data.json/write-json %x %out %escape-unicode?)"}
   {:describe "write-str",
    :params {:x ["0" "1" "-1" "42" "3.14"]},

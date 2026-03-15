@@ -3,7 +3,7 @@
  :parametric
  [{:describe "quick-check",
    :params
-   {:num-tests ["nil" "true" "0" "1" "-1"],
-    :property ["nil" "true" "0" "1" "-1"]},
+   {:num-tests ["nil" "true" "false" "0" "1"],
+    :property ["nil" "true" "false" "0" "1"]},
    :template "(clojure.test.check/quick-check %num-tests %property)"}]}
 ]

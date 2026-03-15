@@ -21,7 +21,7 @@
     :yrel ["#{}" "#{1 2 3}" "#{:a :b}" "#{{:a 1 :b 2} {:a 3 :b 4}}"]},
    :template "(clojure.set/join %xrel %yrel)"}
   {:describe "map-invert",
-   :params {:m ["{}" "{:a 1}" "{:a 1 :b 2 :c 3}"]},
+   :params {:m ["{}" "{:a 1}" "{:a 1 :b 2 :c 3}" "{nil nil}"]},
    :template "(clojure.set/map-invert %m)"}
   {:describe "project",
    :params
@@ -31,12 +31,12 @@
   {:describe "rename",
    :params
    {:xrel ["#{}" "#{1 2 3}" "#{:a :b}" "#{{:a 1 :b 2} {:a 3 :b 4}}"],
-    :kmap ["{}" "{:a 1}" "{:a 1 :b 2 :c 3}"]},
+    :kmap ["{}" "{:a 1}" "{:a 1 :b 2 :c 3}" "{nil nil}"]},
    :template "(clojure.set/rename %xrel %kmap)"}
   {:describe "rename-keys",
    :params
-   {:map ["{}" "{:a 1}" "{:a 1 :b 2 :c 3}"],
-    :kmap ["{}" "{:a 1}" "{:a 1 :b 2 :c 3}"]},
+   {:map ["{}" "{:a 1}" "{:a 1 :b 2 :c 3}" "{nil nil}"],
+    :kmap ["{}" "{:a 1}" "{:a 1 :b 2 :c 3}" "{nil nil}"]},
    :template "(clojure.set/rename-keys %map %kmap)"}
   {:describe "select",
    :params

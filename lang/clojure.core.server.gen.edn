@@ -8,8 +8,8 @@
  :parametric
  [{:describe "prepl",
    :params
-   {:in-reader ["nil" "true" "0" "1" "-1"],
-    :out-fn ["nil" "true" "0" "1" "-1"]},
+   {:in-reader ["nil" "true" "false" "0" "1"],
+    :out-fn ["nil" "true" "false" "0" "1"]},
    :template "(clojure.core.server/prepl %in-reader %out-fn)"}
   {:describe "remote-prepl",
    :params
@@ -21,18 +21,18 @@
    "(clojure.core.server/remote-prepl %host %port %in-reader %out-fn)"}
   {:describe "repl-read",
    :params
-   {:request-prompt ["nil" "true" "0" "1" "-1"],
-    :request-exit ["nil" "true" "0" "1" "-1"]},
+   {:request-prompt ["nil" "true" "false" "0" "1"],
+    :request-exit ["nil" "true" "false" "0" "1"]},
    :template
    "(clojure.core.server/repl-read %request-prompt %request-exit)"}
   {:describe "start-server",
-   :params {:opts ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:opts ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.core.server/start-server %opts)"}
   {:describe "start-servers",
    :params
-   {:system-props ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   {:system-props ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.core.server/start-servers %system-props)"}
   {:describe "stop-server",
-   :params {:name ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:name ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.core.server/stop-server %name)"}]}
 ]

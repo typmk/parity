@@ -6,14 +6,15 @@
  :parametric
  [{:describe "append!",
    :params
-   {:acc ["nil" "true" "0" "1" "-1"], :x ["0" "1" "-1" "42" "3.14"]},
+   {:acc ["nil" "true" "false" "0" "1"],
+    :x ["0" "1" "-1" "42" "3.14"]},
    :template "(clojure.core.reducers/append! %acc %x)"}
   {:describe "cat",
-   :params {:ctor ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:ctor ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.core.reducers/cat %ctor)"}
   {:describe "coll-fold",
    :params
-   {:coll ["[]" "[1 2 3]"],
+   {:coll ["nil" "[]"],
     :n ["0" "1"],
     :combinef ["nil" "true"],
     :reducef ["nil" "true"]},
@@ -30,21 +31,21 @@
    :template "(clojure.core.reducers/fjtask %f)"}
   {:describe "flatten",
    :params
-   {:coll ["[]" "[1 2 3]" "'(1 2 3)" "{:a 1 :b 2}" "#{1 2 3}"]},
+   {:coll ["nil" "[]" "[1 2 3]" "'(1 2 3)" "{:a 1 :b 2}" "#{1 2 3}"]},
    :template "(clojure.core.reducers/flatten %coll)"}
   {:describe "fold",
    :params
-   {:reducef ["nil" "true" "0" "1" "-1"],
-    :coll ["[]" "[1 2 3]" "'(1 2 3)" "{:a 1 :b 2}" "#{1 2 3}"]},
+   {:reducef ["nil" "true" "false" "0" "1"],
+    :coll ["nil" "[]" "[1 2 3]" "'(1 2 3)" "{:a 1 :b 2}"]},
    :template "(clojure.core.reducers/fold %reducef %coll)"}
   {:describe "foldcat",
    :params
-   {:coll ["[]" "[1 2 3]" "'(1 2 3)" "{:a 1 :b 2}" "#{1 2 3}"]},
+   {:coll ["nil" "[]" "[1 2 3]" "'(1 2 3)" "{:a 1 :b 2}" "#{1 2 3}"]},
    :template "(clojure.core.reducers/foldcat %coll)"}
   {:describe "folder",
    :params
-   {:coll ["[]" "[1 2 3]" "'(1 2 3)" "{:a 1 :b 2}" "#{1 2 3}"],
-    :xf ["(map inc)" "(filter even?)" "(take 3)"]},
+   {:coll ["nil" "[]" "[1 2 3]" "'(1 2 3)" "{:a 1 :b 2}"],
+    :xf ["(map inc)" "(filter even?)" "(take 3)" "(dedupe)"]},
    :template "(clojure.core.reducers/folder %coll %xf)"}
   {:describe "map",
    :params {:f ["inc" "dec" "identity" "str" "keyword"]},
@@ -54,18 +55,18 @@
    :template "(clojure.core.reducers/mapcat %f)"}
   {:describe "monoid",
    :params
-   {:op ["nil" "true" "0" "1" "-1"],
-    :ctor ["nil" "true" "0" "1" "-1"]},
+   {:op ["nil" "true" "false" "0" "1"],
+    :ctor ["nil" "true" "false" "0" "1"]},
    :template "(clojure.core.reducers/monoid %op %ctor)"}
   {:describe "reduce",
    :params
    {:f ["inc" "dec" "identity" "str" "keyword"],
-    :coll ["[]" "[1 2 3]" "'(1 2 3)" "{:a 1 :b 2}" "#{1 2 3}"]},
+    :coll ["nil" "[]" "[1 2 3]" "'(1 2 3)" "{:a 1 :b 2}"]},
    :template "(clojure.core.reducers/reduce %f %coll)"}
   {:describe "reducer",
    :params
-   {:coll ["[]" "[1 2 3]" "'(1 2 3)" "{:a 1 :b 2}" "#{1 2 3}"],
-    :xf ["(map inc)" "(filter even?)" "(take 3)"]},
+   {:coll ["nil" "[]" "[1 2 3]" "'(1 2 3)" "{:a 1 :b 2}"],
+    :xf ["(map inc)" "(filter even?)" "(take 3)" "(dedupe)"]},
    :template "(clojure.core.reducers/reducer %coll %xf)"}
   {:describe "remove",
    :params {:pred ["inc" "dec" "identity" "str" "keyword"]},

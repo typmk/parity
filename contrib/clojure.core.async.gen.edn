@@ -5,160 +5,160 @@
   {:it "promise-chan", :eval "(clojure.core.async/promise-chan)"}],
  :parametric
  [{:describe "<!",
-   :params {:port ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:port ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.core.async/<! %port)"}
   {:describe "<!!",
-   :params {:port ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:port ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.core.async/<!! %port)"}
   {:describe ">!",
    :params
-   {:port ["nil" "true" "0" "1" "-1"],
-    :val ["nil" "true" "0" "1" "-1"]},
+   {:port ["nil" "true" "false" "0" "1"],
+    :val ["nil" "true" "false" "0" "1"]},
    :template "(clojure.core.async/>! %port %val)"}
   {:describe ">!!",
    :params
-   {:port ["nil" "true" "0" "1" "-1"],
-    :val ["nil" "true" "0" "1" "-1"]},
+   {:port ["nil" "true" "false" "0" "1"],
+    :val ["nil" "true" "false" "0" "1"]},
    :template "(clojure.core.async/>!! %port %val)"}
   {:describe "admix",
    :params
-   {:mix ["nil" "true" "0" "1" "-1"], :ch ["nil" "true" "0" "1" "-1"]},
+   {:mix ["nil" "true" "false" "0" "1"],
+    :ch ["\\a" "\\space" "\\newline" "\\tab"]},
    :template "(clojure.core.async/admix %mix %ch)"}
   {:describe "admix*",
    :params
-   {:m ["{}" "{:a 1}" "{:a 1 :b 2 :c 3}"],
-    :ch ["nil" "true" "0" "1" "-1"]},
+   {:m ["{}" "{:a 1}" "{:a 1 :b 2 :c 3}" "{nil nil}"],
+    :ch ["\\a" "\\space" "\\newline" "\\tab"]},
    :template "(clojure.core.async/admix* %m %ch)"}
   {:describe "alts!",
-   :params
-   {:ports ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:ports ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.core.async/alts! %ports)"}
   {:describe "alts!!",
-   :params
-   {:ports ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:ports ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.core.async/alts!! %ports)"}
   {:describe "buffer",
    :params {:n ["0" "1" "-1" "42" "3.14"]},
    :template "(clojure.core.async/buffer %n)"}
   {:describe "chan",
-   :params
-   {:buf-or-n ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:buf-or-n ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.core.async/chan %buf-or-n)"}
   {:describe "close!",
-   :params {:chan ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:chan ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.core.async/close! %chan)"}
   {:describe "defblockingop",
    :params
-   {:op ["nil" "true" "0"],
-    :doc ["nil" "true" "0"],
-    :arglist ["nil" "true" "0"]},
+   {:op ["nil" "true" "false"],
+    :doc ["nil" "true" "false"],
+    :arglist ["nil" "true" "false"]},
    :template "(clojure.core.async/defblockingop %op %doc %arglist)"}
   {:describe "do-alt",
    :params
-   {:alts ["nil" "true" "0" "1" "-1"],
-    :clauses ["nil" "true" "0" "1" "-1"]},
+   {:alts ["nil" "true" "false" "0" "1"],
+    :clauses ["nil" "true" "false" "0" "1"]},
    :template "(clojure.core.async/do-alt %alts %clauses)"}
   {:describe "do-alts",
    :params
-   {:fret ["nil" "true" "0"],
-    :ports ["nil" "true" "0"],
-    :opts ["nil" "true" "0"]},
+   {:fret ["nil" "true" "false"],
+    :ports ["nil" "true" "false"],
+    :opts ["nil" "true" "false"]},
    :template "(clojure.core.async/do-alts %fret %ports %opts)"}
   {:describe "dropping-buffer",
    :params {:n ["0" "1" "-1" "42" "3.14"]},
    :template "(clojure.core.async/dropping-buffer %n)"}
   {:describe "filter<",
    :params
-   {:p ["nil" "true" "0" "1" "-1"], :ch ["nil" "true" "0" "1" "-1"]},
+   {:p ["nil" "true" "false" "0" "1"],
+    :ch ["\\a" "\\space" "\\newline" "\\tab"]},
    :template "(clojure.core.async/filter< %p %ch)"}
   {:describe "filter>",
    :params
-   {:p ["nil" "true" "0" "1" "-1"], :ch ["nil" "true" "0" "1" "-1"]},
+   {:p ["nil" "true" "false" "0" "1"],
+    :ch ["\\a" "\\space" "\\newline" "\\tab"]},
    :template "(clojure.core.async/filter> %p %ch)"}
   {:describe "fn-handler",
    :params {:f ["inc" "dec" "identity" "str" "keyword"]},
    :template "(clojure.core.async/fn-handler %f)"}
   {:describe "go-loop",
-   :params
-   {:bindings ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:bindings ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.core.async/go-loop %bindings)"}
   {:describe "into",
    :params
-   {:coll ["[]" "[1 2 3]" "'(1 2 3)" "{:a 1 :b 2}" "#{1 2 3}"],
-    :ch ["nil" "true" "0" "1" "-1"]},
+   {:coll ["nil" "[]" "[1 2 3]" "'(1 2 3)" "{:a 1 :b 2}"],
+    :ch ["\\a" "\\space" "\\newline" "\\tab"]},
    :template "(clojure.core.async/into %coll %ch)"}
   {:describe "ioc-alts!",
    :params
-   {:state ["nil" "true" "0"],
-    :cont-block ["nil" "true" "0"],
-    :ports ["nil" "true" "0"]},
+   {:state ["nil" "true" "false"],
+    :cont-block ["nil" "true" "false"],
+    :ports ["nil" "true" "false"]},
    :template
    "(clojure.core.async/ioc-alts! %state %cont-block %ports)"}
   {:describe "map",
    :params
    {:f ["inc" "dec" "identity" "str" "keyword"],
-    :chs ["nil" "true" "0" "1" "-1"]},
+    :chs ["nil" "true" "false" "0" "1"]},
    :template "(clojure.core.async/map %f %chs)"}
   {:describe "map<",
    :params
    {:f ["inc" "dec" "identity" "str" "keyword"],
-    :ch ["nil" "true" "0" "1" "-1"]},
+    :ch ["\\a" "\\space" "\\newline" "\\tab"]},
    :template "(clojure.core.async/map< %f %ch)"}
   {:describe "map>",
    :params
    {:f ["inc" "dec" "identity" "str" "keyword"],
-    :ch ["nil" "true" "0" "1" "-1"]},
+    :ch ["\\a" "\\space" "\\newline" "\\tab"]},
    :template "(clojure.core.async/map> %f %ch)"}
   {:describe "mapcat<",
    :params
    {:f ["inc" "dec" "identity" "str" "keyword"],
-    :in ["nil" "true" "0" "1" "-1"]},
+    :in ["nil" "true" "false" "0" "1"]},
    :template "(clojure.core.async/mapcat< %f %in)"}
   {:describe "mapcat>",
    :params
    {:f ["inc" "dec" "identity" "str" "keyword"],
-    :out ["nil" "true" "0" "1" "-1"]},
+    :out ["nil" "true" "false" "0" "1"]},
    :template "(clojure.core.async/mapcat> %f %out)"}
   {:describe "merge",
-   :params {:chs ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:chs ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.core.async/merge %chs)"}
   {:describe "mix",
-   :params {:out ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:out ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.core.async/mix %out)"}
   {:describe "mult",
-   :params {:ch ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:ch ["\\a" "\\space" "\\newline" "\\tab"]},
    :template "(clojure.core.async/mult %ch)"}
   {:describe "muxch*",
-   :params {:_ ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:_ ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.core.async/muxch* %_)"}
   {:describe "offer!",
    :params
-   {:port ["nil" "true" "0" "1" "-1"],
-    :val ["nil" "true" "0" "1" "-1"]},
+   {:port ["nil" "true" "false" "0" "1"],
+    :val ["nil" "true" "false" "0" "1"]},
    :template "(clojure.core.async/offer! %port %val)"}
   {:describe "onto-chan",
    :params
-   {:ch ["nil" "true" "0" "1" "-1"],
-    :coll ["[]" "[1 2 3]" "'(1 2 3)" "{:a 1 :b 2}" "#{1 2 3}"]},
+   {:ch ["\\a" "\\space" "\\newline" "\\tab"],
+    :coll ["nil" "[]" "[1 2 3]" "'(1 2 3)" "{:a 1 :b 2}"]},
    :template "(clojure.core.async/onto-chan %ch %coll)"}
   {:describe "onto-chan!",
    :params
-   {:ch ["nil" "true" "0" "1" "-1"],
-    :coll ["[]" "[1 2 3]" "'(1 2 3)" "{:a 1 :b 2}" "#{1 2 3}"]},
+   {:ch ["\\a" "\\space" "\\newline" "\\tab"],
+    :coll ["nil" "[]" "[1 2 3]" "'(1 2 3)" "{:a 1 :b 2}"]},
    :template "(clojure.core.async/onto-chan! %ch %coll)"}
   {:describe "onto-chan!!",
    :params
-   {:ch ["nil" "true" "0" "1" "-1"],
-    :coll ["[]" "[1 2 3]" "'(1 2 3)" "{:a 1 :b 2}" "#{1 2 3}"]},
+   {:ch ["\\a" "\\space" "\\newline" "\\tab"],
+    :coll ["nil" "[]" "[1 2 3]" "'(1 2 3)" "{:a 1 :b 2}"]},
    :template "(clojure.core.async/onto-chan!! %ch %coll)"}
   {:describe "partition",
    :params
-   {:n ["0" "1" "-1" "42" "3.14"], :ch ["nil" "true" "0" "1" "-1"]},
+   {:n ["0" "1" "-1" "42" "3.14"],
+    :ch ["\\a" "\\space" "\\newline" "\\tab"]},
    :template "(clojure.core.async/partition %n %ch)"}
   {:describe "partition-by",
    :params
    {:f ["inc" "dec" "identity" "str" "keyword"],
-    :ch ["nil" "true" "0" "1" "-1"]},
+    :ch ["\\a" "\\space" "\\newline" "\\tab"]},
    :template "(clojure.core.async/partition-by %f %ch)"}
   {:describe "pipe",
    :params
@@ -183,188 +183,201 @@
     :from ["0" "1"]},
    :template "(clojure.core.async/pipeline-blocking %n %to %xf %from)"}
   {:describe "poll!",
-   :params {:port ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:port ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.core.async/poll! %port)"}
   {:describe "promise-chan",
-   :params {:xform ["(map inc)" "(filter even?)" "(take 3)"]},
+   :params
+   {:xform ["(map inc)" "(filter even?)" "(take 3)" "(dedupe)"]},
    :template "(clojure.core.async/promise-chan %xform)"}
   {:describe "pub",
    :params
-   {:ch ["nil" "true" "0" "1" "-1"],
-    :topic-fn ["nil" "true" "0" "1" "-1"]},
+   {:ch ["\\a" "\\space" "\\newline" "\\tab"],
+    :topic-fn ["nil" "true" "false" "0" "1"]},
    :template "(clojure.core.async/pub %ch %topic-fn)"}
   {:describe "put!",
    :params
-   {:port ["nil" "true" "0" "1" "-1"],
-    :val ["nil" "true" "0" "1" "-1"]},
+   {:port ["nil" "true" "false" "0" "1"],
+    :val ["nil" "true" "false" "0" "1"]},
    :template "(clojure.core.async/put! %port %val)"}
   {:describe "reduce",
    :params
    {:f ["inc" "dec" "identity"],
     :init ["0" "1" "-1"],
-    :ch ["nil" "true" "0"]},
+    :ch ["\\a" "\\space" "\\newline"]},
    :template "(clojure.core.async/reduce %f %init %ch)"}
   {:describe "remove<",
    :params
-   {:p ["nil" "true" "0" "1" "-1"], :ch ["nil" "true" "0" "1" "-1"]},
+   {:p ["nil" "true" "false" "0" "1"],
+    :ch ["\\a" "\\space" "\\newline" "\\tab"]},
    :template "(clojure.core.async/remove< %p %ch)"}
   {:describe "remove>",
    :params
-   {:p ["nil" "true" "0" "1" "-1"], :ch ["nil" "true" "0" "1" "-1"]},
+   {:p ["nil" "true" "false" "0" "1"],
+    :ch ["\\a" "\\space" "\\newline" "\\tab"]},
    :template "(clojure.core.async/remove> %p %ch)"}
   {:describe "sliding-buffer",
    :params {:n ["0" "1" "-1" "42" "3.14"]},
    :template "(clojure.core.async/sliding-buffer %n)"}
   {:describe "solo-mode",
    :params
-   {:mix ["nil" "true" "0" "1" "-1"],
-    :mode ["nil" "true" "0" "1" "-1"]},
+   {:mix ["nil" "true" "false" "0" "1"],
+    :mode ["nil" "true" "false" "0" "1"]},
    :template "(clojure.core.async/solo-mode %mix %mode)"}
   {:describe "solo-mode*",
    :params
-   {:m ["{}" "{:a 1}" "{:a 1 :b 2 :c 3}"],
-    :mode ["nil" "true" "0" "1" "-1"]},
+   {:m ["{}" "{:a 1}" "{:a 1 :b 2 :c 3}" "{nil nil}"],
+    :mode ["nil" "true" "false" "0" "1"]},
    :template "(clojure.core.async/solo-mode* %m %mode)"}
   {:describe "split",
    :params
-   {:p ["nil" "true" "0" "1" "-1"], :ch ["nil" "true" "0" "1" "-1"]},
+   {:p ["nil" "true" "false" "0" "1"],
+    :ch ["\\a" "\\space" "\\newline" "\\tab"]},
    :template "(clojure.core.async/split %p %ch)"}
   {:describe "sub",
    :params
-   {:p ["nil" "true" "0"],
-    :topic ["nil" "true" "0"],
-    :ch ["nil" "true" "0"]},
+   {:p ["nil" "true" "false"],
+    :topic ["nil" "true" "false"],
+    :ch ["\\a" "\\space" "\\newline"]},
    :template "(clojure.core.async/sub %p %topic %ch)"}
   {:describe "sub*",
    :params
    {:p ["nil" "true"],
     :v ["nil" "true"],
-    :ch ["nil" "true"],
+    :ch ["\\a" "\\space"],
     :close? ["nil" "true"]},
    :template "(clojure.core.async/sub* %p %v %ch %close?)"}
   {:describe "take",
    :params
-   {:n ["0" "1" "-1" "42" "3.14"], :ch ["nil" "true" "0" "1" "-1"]},
+   {:n ["0" "1" "-1" "42" "3.14"],
+    :ch ["\\a" "\\space" "\\newline" "\\tab"]},
    :template "(clojure.core.async/take %n %ch)"}
   {:describe "take!",
    :params
-   {:port ["nil" "true" "0" "1" "-1"],
-    :fn1 ["nil" "true" "0" "1" "-1"]},
+   {:port ["nil" "true" "false" "0" "1"],
+    :fn1 ["nil" "true" "false" "0" "1"]},
    :template "(clojure.core.async/take! %port %fn1)"}
   {:describe "tap",
    :params
-   {:mult ["nil" "true" "0" "1" "-1"],
-    :ch ["nil" "true" "0" "1" "-1"]},
+   {:mult ["nil" "true" "false" "0" "1"],
+    :ch ["\\a" "\\space" "\\newline" "\\tab"]},
    :template "(clojure.core.async/tap %mult %ch)"}
   {:describe "tap*",
    :params
    {:m ["{}" "{:a 1}" "{:a 1 :b 2 :c 3}"],
-    :ch ["nil" "true" "0"],
-    :close? ["nil" "true" "0"]},
+    :ch ["\\a" "\\space" "\\newline"],
+    :close? ["nil" "true" "false"]},
    :template "(clojure.core.async/tap* %m %ch %close?)"}
   {:describe "thread-call",
    :params {:f ["inc" "dec" "identity" "str" "keyword"]},
    :template "(clojure.core.async/thread-call %f)"}
   {:describe "timeout",
-   :params
-   {:msecs ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:msecs ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.core.async/timeout %msecs)"}
   {:describe "to-chan",
    :params
-   {:coll ["[]" "[1 2 3]" "'(1 2 3)" "{:a 1 :b 2}" "#{1 2 3}"]},
+   {:coll ["nil" "[]" "[1 2 3]" "'(1 2 3)" "{:a 1 :b 2}" "#{1 2 3}"]},
    :template "(clojure.core.async/to-chan %coll)"}
   {:describe "to-chan!",
    :params
-   {:coll ["[]" "[1 2 3]" "'(1 2 3)" "{:a 1 :b 2}" "#{1 2 3}"]},
+   {:coll ["nil" "[]" "[1 2 3]" "'(1 2 3)" "{:a 1 :b 2}" "#{1 2 3}"]},
    :template "(clojure.core.async/to-chan! %coll)"}
   {:describe "to-chan!!",
    :params
-   {:coll ["[]" "[1 2 3]" "'(1 2 3)" "{:a 1 :b 2}" "#{1 2 3}"]},
+   {:coll ["nil" "[]" "[1 2 3]" "'(1 2 3)" "{:a 1 :b 2}" "#{1 2 3}"]},
    :template "(clojure.core.async/to-chan!! %coll)"}
   {:describe "toggle",
    :params
-   {:mix ["nil" "true" "0" "1" "-1"],
-    :state-map ["{}" "{:a 1}" "{:a 1 :b 2 :c 3}"]},
+   {:mix ["nil" "true" "false" "0" "1"],
+    :state-map ["{}" "{:a 1}" "{:a 1 :b 2 :c 3}" "{nil nil}"]},
    :template "(clojure.core.async/toggle %mix %state-map)"}
   {:describe "toggle*",
    :params
-   {:m ["{}" "{:a 1}" "{:a 1 :b 2 :c 3}"],
-    :state-map ["{}" "{:a 1}" "{:a 1 :b 2 :c 3}"]},
+   {:m ["{}" "{:a 1}" "{:a 1 :b 2 :c 3}" "{nil nil}"],
+    :state-map ["{}" "{:a 1}" "{:a 1 :b 2 :c 3}" "{nil nil}"]},
    :template "(clojure.core.async/toggle* %m %state-map)"}
   {:describe "transduce",
    :params
    {:xform ["(map inc)" "(filter even?)"],
     :f ["inc" "dec"],
     :init ["0" "1"],
-    :ch ["nil" "true"]},
+    :ch ["\\a" "\\space"]},
    :template "(clojure.core.async/transduce %xform %f %init %ch)"}
   {:describe "unblocking-buffer?",
    :params
    {:val
     ["nil"
      "true"
+     "false"
      "0"
      "1"
      "-1"
      "42"
      "3.14"
+     "\"\""
      "\"hello\""
      ":a"
+     "'foo"
+     "\\a"
      "[]"
      "[1 2]"
+     "'()"
+     "'(1 2)"
+     "{}"
      "{:a 1}"
+     "#{}"
      "#{1}"]},
    :template "(clojure.core.async/unblocking-buffer? %val)"}
   {:describe "unique",
-   :params {:ch ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:ch ["\\a" "\\space" "\\newline" "\\tab"]},
    :template "(clojure.core.async/unique %ch)"}
   {:describe "unmix",
    :params
-   {:mix ["nil" "true" "0" "1" "-1"], :ch ["nil" "true" "0" "1" "-1"]},
+   {:mix ["nil" "true" "false" "0" "1"],
+    :ch ["\\a" "\\space" "\\newline" "\\tab"]},
    :template "(clojure.core.async/unmix %mix %ch)"}
   {:describe "unmix*",
    :params
-   {:m ["{}" "{:a 1}" "{:a 1 :b 2 :c 3}"],
-    :ch ["nil" "true" "0" "1" "-1"]},
+   {:m ["{}" "{:a 1}" "{:a 1 :b 2 :c 3}" "{nil nil}"],
+    :ch ["\\a" "\\space" "\\newline" "\\tab"]},
    :template "(clojure.core.async/unmix* %m %ch)"}
   {:describe "unmix-all",
-   :params {:mix ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:mix ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.core.async/unmix-all %mix)"}
   {:describe "unmix-all*",
-   :params {:m ["{}" "{:a 1}" "{:a 1 :b 2 :c 3}"]},
+   :params {:m ["{}" "{:a 1}" "{:a 1 :b 2 :c 3}" "{nil nil}"]},
    :template "(clojure.core.async/unmix-all* %m)"}
   {:describe "unsub",
    :params
-   {:p ["nil" "true" "0"],
-    :topic ["nil" "true" "0"],
-    :ch ["nil" "true" "0"]},
+   {:p ["nil" "true" "false"],
+    :topic ["nil" "true" "false"],
+    :ch ["\\a" "\\space" "\\newline"]},
    :template "(clojure.core.async/unsub %p %topic %ch)"}
   {:describe "unsub*",
    :params
-   {:p ["nil" "true" "0"],
-    :v ["nil" "true" "0"],
-    :ch ["nil" "true" "0"]},
+   {:p ["nil" "true" "false"],
+    :v ["nil" "true" "false"],
+    :ch ["\\a" "\\space" "\\newline"]},
    :template "(clojure.core.async/unsub* %p %v %ch)"}
   {:describe "unsub-all",
-   :params {:p ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:p ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.core.async/unsub-all %p)"}
   {:describe "unsub-all*",
-   :params {:p ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:p ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.core.async/unsub-all* %p)"}
   {:describe "untap",
    :params
-   {:mult ["nil" "true" "0" "1" "-1"],
-    :ch ["nil" "true" "0" "1" "-1"]},
+   {:mult ["nil" "true" "false" "0" "1"],
+    :ch ["\\a" "\\space" "\\newline" "\\tab"]},
    :template "(clojure.core.async/untap %mult %ch)"}
   {:describe "untap*",
    :params
-   {:m ["{}" "{:a 1}" "{:a 1 :b 2 :c 3}"],
-    :ch ["nil" "true" "0" "1" "-1"]},
+   {:m ["{}" "{:a 1}" "{:a 1 :b 2 :c 3}" "{nil nil}"],
+    :ch ["\\a" "\\space" "\\newline" "\\tab"]},
    :template "(clojure.core.async/untap* %m %ch)"}
   {:describe "untap-all",
-   :params {:mult ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:mult ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.core.async/untap-all %mult)"}
   {:describe "untap-all*",
-   :params {:m ["{}" "{:a 1}" "{:a 1 :b 2 :c 3}"]},
+   :params {:m ["{}" "{:a 1}" "{:a 1 :b 2 :c 3}" "{nil nil}"]},
    :template "(clojure.core.async/untap-all* %m)"}]}
 ]

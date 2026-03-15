@@ -7,7 +7,8 @@
   {:it "merge", :eval "(clojure.data.int-map/merge)"}],
  :parametric
  [{:describe "dense-int-set",
-   :params {:s ["\"\"" "\"hello\"" "\"hello world\"" "\"abc\""]},
+   :params
+   {:s ["\"\"" "\"hello\"" "\"hello world\"" "\"abc\"" "\"\""]},
    :template "(clojure.data.int-map/dense-int-set %s)"}
   {:describe "difference",
    :params
@@ -18,7 +19,8 @@
    {:a ["0" "1" "-1" "42" "3.14"], :b ["0" "1" "-1" "42" "3.14"]},
    :template "(clojure.data.int-map/int-map %a %b)"}
   {:describe "int-set",
-   :params {:s ["\"\"" "\"hello\"" "\"hello world\"" "\"abc\""]},
+   :params
+   {:s ["\"\"" "\"hello\"" "\"hello world\"" "\"abc\"" "\"\""]},
    :template "(clojure.data.int-map/int-set %s)"}
   {:describe "intersection",
    :params
@@ -34,8 +36,8 @@
   {:describe "range",
    :params
    {:x ["0" "1" "-1"],
-    :min ["nil" "true" "0"],
-    :max ["nil" "true" "0"]},
+    :min ["nil" "true" "false"],
+    :max ["nil" "true" "false"]},
    :template "(clojure.data.int-map/range %x %min %max)"}
   {:describe "union",
    :params

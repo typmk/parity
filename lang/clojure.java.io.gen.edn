@@ -12,36 +12,40 @@
    :template "(clojure.java.io/as-url %x)"}
   {:describe "copy",
    :params
-   {:input ["nil" "true" "0" "1" "-1"],
-    :output ["nil" "true" "0" "1" "-1"]},
+   {:input ["nil" "true" "false" "0" "1"],
+    :output ["nil" "true" "false" "0" "1"]},
    :template "(clojure.java.io/copy %input %output)"}
   {:describe "delete-file",
    :params {:f ["inc" "dec" "identity" "str" "keyword"]},
    :template "(clojure.java.io/delete-file %f)"}
   {:describe "file",
-   :params {:arg ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:arg ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.java.io/file %arg)"}
   {:describe "input-stream",
    :params {:x ["0" "1" "-1" "42" "3.14"]},
    :template "(clojure.java.io/input-stream %x)"}
   {:describe "make-input-stream",
    :params
-   {:x ["0" "1" "-1" "42" "3.14"], :opts ["nil" "true" "0" "1" "-1"]},
+   {:x ["0" "1" "-1" "42" "3.14"],
+    :opts ["nil" "true" "false" "0" "1"]},
    :template "(clojure.java.io/make-input-stream %x %opts)"}
   {:describe "make-output-stream",
    :params
-   {:x ["0" "1" "-1" "42" "3.14"], :opts ["nil" "true" "0" "1" "-1"]},
+   {:x ["0" "1" "-1" "42" "3.14"],
+    :opts ["nil" "true" "false" "0" "1"]},
    :template "(clojure.java.io/make-output-stream %x %opts)"}
   {:describe "make-parents",
    :params {:f ["inc" "dec" "identity" "str" "keyword"]},
    :template "(clojure.java.io/make-parents %f)"}
   {:describe "make-reader",
    :params
-   {:x ["0" "1" "-1" "42" "3.14"], :opts ["nil" "true" "0" "1" "-1"]},
+   {:x ["0" "1" "-1" "42" "3.14"],
+    :opts ["nil" "true" "false" "0" "1"]},
    :template "(clojure.java.io/make-reader %x %opts)"}
   {:describe "make-writer",
    :params
-   {:x ["0" "1" "-1" "42" "3.14"], :opts ["nil" "true" "0" "1" "-1"]},
+   {:x ["0" "1" "-1" "42" "3.14"],
+    :opts ["nil" "true" "false" "0" "1"]},
    :template "(clojure.java.io/make-writer %x %opts)"}
   {:describe "output-stream",
    :params {:x ["0" "1" "-1" "42" "3.14"]},

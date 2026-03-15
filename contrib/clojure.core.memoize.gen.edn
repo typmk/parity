@@ -3,7 +3,7 @@
  :parametric
  [{:describe "build-memoizer",
    :params
-   {:cache-factory ["nil" "true" "0" "1" "-1"],
+   {:cache-factory ["nil" "true" "false" "0" "1"],
     :f ["inc" "dec" "identity" "str" "keyword"]},
    :template "(clojure.core.memoize/build-memoizer %cache-factory %f)"}
   {:describe "fifo",
@@ -11,7 +11,7 @@
    :template "(clojure.core.memoize/fifo %f)"}
   {:describe "lazy-snapshot",
    :params
-   {:memoized-fn ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   {:memoized-fn ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.core.memoize/lazy-snapshot %memoized-fn)"}
   {:describe "lru",
    :params {:f ["inc" "dec" "identity" "str" "keyword"]},
@@ -37,12 +37,12 @@
   {:describe "memo-reset!",
    :params
    {:f ["inc" "dec" "identity" "str" "keyword"],
-    :base ["nil" "true" "0" "1" "-1"]},
+    :base ["nil" "true" "false" "0" "1"]},
    :template "(clojure.core.memoize/memo-reset! %f %base)"}
   {:describe "memo-swap!",
    :params
    {:f ["inc" "dec" "identity" "str" "keyword"],
-    :base ["nil" "true" "0" "1" "-1"]},
+    :base ["nil" "true" "false" "0" "1"]},
    :template "(clojure.core.memoize/memo-swap! %f %base)"}
   {:describe "memo-ttl",
    :params {:f ["inc" "dec" "identity" "str" "keyword"]},
@@ -55,26 +55,34 @@
    {:val
     ["nil"
      "true"
+     "false"
      "0"
      "1"
      "-1"
      "42"
      "3.14"
+     "\"\""
      "\"hello\""
      ":a"
+     "'foo"
+     "\\a"
      "[]"
      "[1 2]"
+     "'()"
+     "'(1 2)"
+     "{}"
      "{:a 1}"
+     "#{}"
      "#{1}"]},
    :template "(clojure.core.memoize/memoized? %val)"}
   {:describe "memoizer",
    :params
    {:f ["inc" "dec" "identity" "str" "keyword"],
-    :cache ["nil" "true" "0" "1" "-1"]},
+    :cache ["nil" "true" "false" "0" "1"]},
    :template "(clojure.core.memoize/memoizer %f %cache)"}
   {:describe "snapshot",
    :params
-   {:memoized-fn ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   {:memoized-fn ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.core.memoize/snapshot %memoized-fn)"}
   {:describe "ttl",
    :params {:f ["inc" "dec" "identity" "str" "keyword"]},

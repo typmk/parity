@@ -2,18 +2,17 @@
 {:category :clojure.data.csv.functions,
  :parametric
  [{:describe "read-csv",
-   :params
-   {:input ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:input ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.data.csv/read-csv %input)"}
   {:describe "read-csv-from",
    :params
-   {:input ["nil" "true" "0"],
-    :sep ["nil" "true" "0"],
-    :quote ["nil" "true" "0"]},
+   {:input ["nil" "true" "false"],
+    :sep ["nil" "true" "false"],
+    :quote ["nil" "true" "false"]},
    :template "(clojure.data.csv/read-csv-from %input %sep %quote)"}
   {:describe "write-csv",
    :params
-   {:writer ["nil" "true" "0" "1" "-1"],
-    :data ["nil" "true" "0" "1" "-1"]},
+   {:writer ["nil" "true" "false" "0" "1"],
+    :data ["nil" "true" "false" "0" "1"]},
    :template "(clojure.data.csv/write-csv %writer %data)"}]}
 ]

@@ -6,8 +6,8 @@
    :template "(clojure.datafy/datafy %x)"}
   {:describe "nav",
    :params
-   {:coll ["[]" "[1 2 3]" "'(1 2 3)"],
+   {:coll ["nil" "[]" "[1 2 3]"],
     :k [":a" ":b" ":foo"],
-    :v ["nil" "true" "0"]},
+    :v ["nil" "true" "false"]},
    :template "(clojure.datafy/nav %coll %k %v)"}]}
 ]

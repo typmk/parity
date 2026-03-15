@@ -2,6 +2,6 @@
 {:category :clojure.java.browse.functions,
  :parametric
  [{:describe "browse-url",
-   :params {:url ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:url ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.java.browse/browse-url %url)"}]}
 ]

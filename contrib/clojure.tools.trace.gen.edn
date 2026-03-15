@@ -3,61 +3,67 @@
  :parametric
  [{:describe "clone-throwable",
    :params
-   {:this ["nil" "true" "0"],
-    :stack-trace ["nil" "true" "0"],
-    :args ["nil" "true" "0"]},
+   {:this ["nil" "true" "false"],
+    :stack-trace ["nil" "true" "false"],
+    :args ["nil" "true" "false"]},
    :template
    "(clojure.tools.trace/clone-throwable %this %stack-trace %args)"}
   {:describe "deftrace",
-   :params {:name ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:name ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.tools.trace/deftrace %name)"}
   {:describe "dotrace",
-   :params
-   {:fnames ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:fnames ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.tools.trace/dotrace %fnames)"}
   {:describe "trace",
-   :params
-   {:value ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:value ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.tools.trace/trace %value)"}
   {:describe "trace-compose-throwable",
    :params
-   {:throwable ["nil" "true" "0" "1" "-1"],
-    :message ["nil" "true" "0" "1" "-1"]},
+   {:throwable ["nil" "true" "false" "0" "1"],
+    :message ["nil" "true" "false" "0" "1"]},
    :template
    "(clojure.tools.trace/trace-compose-throwable %throwable %message)"}
   {:describe "trace-fn-call",
    :params
-   {:name ["nil" "true" "0"],
+   {:name ["nil" "true" "false"],
     :f ["inc" "dec" "identity"],
-    :args ["nil" "true" "0"]},
+    :args ["nil" "true" "false"]},
    :template "(clojure.tools.trace/trace-fn-call %name %f %args)"}
   {:describe "trace-form",
-   :params {:form ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:form ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.tools.trace/trace-form %form)"}
   {:describe "trace-ns",
    :params {:n ["0" "1" "-1" "42" "3.14"]},
    :template "(clojure.tools.trace/trace-ns %n)"}
   {:describe "trace-ns*",
-   :params {:ns ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:ns ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.tools.trace/trace-ns* %ns)"}
   {:describe "trace-var*",
-   :params {:v ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:v ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.tools.trace/trace-var* %v)"}
   {:describe "traceable?",
    :params
    {:val
     ["nil"
      "true"
+     "false"
      "0"
      "1"
      "-1"
      "42"
      "3.14"
+     "\"\""
      "\"hello\""
      ":a"
+     "'foo"
+     "\\a"
      "[]"
      "[1 2]"
+     "'()"
+     "'(1 2)"
+     "{}"
      "{:a 1}"
+     "#{}"
      "#{1}"]},
    :template "(clojure.tools.trace/traceable? %val)"}
   {:describe "traced?",
@@ -65,25 +71,33 @@
    {:val
     ["nil"
      "true"
+     "false"
      "0"
      "1"
      "-1"
      "42"
      "3.14"
+     "\"\""
      "\"hello\""
      ":a"
+     "'foo"
+     "\\a"
      "[]"
      "[1 2]"
+     "'()"
+     "'(1 2)"
+     "{}"
      "{:a 1}"
+     "#{}"
      "#{1}"]},
    :template "(clojure.tools.trace/traced? %val)"}
   {:describe "untrace-ns",
    :params {:n ["0" "1" "-1" "42" "3.14"]},
    :template "(clojure.tools.trace/untrace-ns %n)"}
   {:describe "untrace-ns*",
-   :params {:ns ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:ns ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.tools.trace/untrace-ns* %ns)"}
   {:describe "untrace-var*",
-   :params {:v ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:v ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.tools.trace/untrace-var* %v)"}]}
 ]

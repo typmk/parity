@@ -3,13 +3,13 @@
  :parametric
  [{:describe "apply-template",
    :params
-   {:argv ["nil" "true" "0"],
-    :expr ["nil" "true" "0"],
-    :values ["nil" "true" "0"]},
+   {:argv ["nil" "true" "false"],
+    :expr ["nil" "true" "false"],
+    :values ["nil" "true" "false"]},
    :template "(clojure.template/apply-template %argv %expr %values)"}
   {:describe "do-template",
    :params
-   {:argv ["nil" "true" "0" "1" "-1"],
-    :expr ["nil" "true" "0" "1" "-1"]},
+   {:argv ["nil" "true" "false" "0" "1"],
+    :expr ["nil" "true" "false" "0" "1"]},
    :template "(clojure.template/do-template %argv %expr)"}]}
 ]

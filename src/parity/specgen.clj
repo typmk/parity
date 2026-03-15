@@ -783,6 +783,72 @@
             (println (format "    %s" (str/join ", " (sort (map :var vars)))))
             (println)))))))
 
+;; =============================================================================
+;; Namespace lists (needed by write-specs for lang/contrib split)
+;; =============================================================================
+
+(def default-namespaces
+  "All namespaces that ship with Clojure + spec."
+  [;; Core
+   "clojure.core"
+   "clojure.core.protocols"
+   "clojure.core.reducers"
+   "clojure.core.server"
+   ;; Data
+   "clojure.data"
+   "clojure.datafy"
+   "clojure.edn"
+   ;; Standard library
+   "clojure.instant"
+   "clojure.math"
+   "clojure.pprint"
+   "clojure.repl"
+   "clojure.set"
+   "clojure.stacktrace"
+   "clojure.string"
+   "clojure.template"
+   "clojure.test"
+   "clojure.walk"
+   "clojure.xml"
+   "clojure.zip"
+   ;; Java interop
+   "clojure.java.browse"
+   "clojure.java.io"
+   "clojure.java.javadoc"
+   "clojure.java.process"
+   "clojure.java.shell"
+   ;; Inspection / reflection
+   "clojure.inspector"
+   "clojure.main"
+   "clojure.reflect"
+   ;; Spec (ships separately but is Cognitect)
+   "clojure.spec.alpha"
+   "clojure.spec.gen.alpha"
+   "clojure.spec.test.alpha"])
+
+(def contrib-namespaces
+  "Contrib libraries (from deps.edn)."
+  [;; Active Cognitect
+   "clojure.core.async"
+   "clojure.core.cache" "clojure.core.memoize"
+   "clojure.data.csv" "clojure.data.json" "clojure.data.xml"
+   "clojure.data.zip" "clojure.data.priority-map"
+   "clojure.data.int-map" "clojure.data.avl"
+   "clojure.java.data" "clojure.java.classpath"
+   "clojure.math.combinatorics" "clojure.math.numeric-tower"
+   "clojure.test.check" "clojure.test.check.generators"
+   "clojure.tools.cli" "clojure.tools.logging"
+   "clojure.tools.namespace.find"
+   "clojure.tools.reader" "clojure.tools.reader.edn"
+   "clojure.tools.trace"
+   ;; Stable
+   "clojure.core.logic" "clojure.core.match"
+   "clojure.core.unify"])
+
+(def all-namespaces
+  "All namespaces: shipped + contrib."
+  (vec (concat default-namespaces contrib-namespaces)))
+
 (defn print-spec [results]
   (println "[")
   (doseq [r results :when (or (seq (:tests r)) (seq (:parametric r)))]
@@ -1082,68 +1148,6 @@
 ;; =============================================================================
 ;; Main
 ;; =============================================================================
-
-(def default-namespaces
-  "All namespaces that ship with Clojure + spec."
-  [;; Core
-   "clojure.core"
-   "clojure.core.protocols"
-   "clojure.core.reducers"
-   "clojure.core.server"
-   ;; Data
-   "clojure.data"
-   "clojure.datafy"
-   "clojure.edn"
-   ;; Standard library
-   "clojure.instant"
-   "clojure.math"
-   "clojure.pprint"
-   "clojure.repl"
-   "clojure.set"
-   "clojure.stacktrace"
-   "clojure.string"
-   "clojure.template"
-   "clojure.test"
-   "clojure.walk"
-   "clojure.xml"
-   "clojure.zip"
-   ;; Java interop
-   "clojure.java.browse"
-   "clojure.java.io"
-   "clojure.java.javadoc"
-   "clojure.java.process"
-   "clojure.java.shell"
-   ;; Inspection / reflection
-   "clojure.inspector"
-   "clojure.main"
-   "clojure.reflect"
-   ;; Spec (ships separately but is Cognitect)
-   "clojure.spec.alpha"
-   "clojure.spec.gen.alpha"
-   "clojure.spec.test.alpha"])
-
-(def contrib-namespaces
-  "Contrib libraries (from deps.edn)."
-  [;; Active Cognitect
-   "clojure.core.async"
-   "clojure.core.cache" "clojure.core.memoize"
-   "clojure.data.csv" "clojure.data.json" "clojure.data.xml"
-   "clojure.data.zip" "clojure.data.priority-map"
-   "clojure.data.int-map" "clojure.data.avl"
-   "clojure.java.data" "clojure.java.classpath"
-   "clojure.math.combinatorics" "clojure.math.numeric-tower"
-   "clojure.test.check" "clojure.test.check.generators"
-   "clojure.tools.cli" "clojure.tools.logging"
-   "clojure.tools.namespace.find"
-   "clojure.tools.reader" "clojure.tools.reader.edn"
-   "clojure.tools.trace"
-   ;; Stable
-   "clojure.core.logic" "clojure.core.match"
-   "clojure.core.unify"])
-
-(def all-namespaces
-  "All namespaces: shipped + contrib."
-  (vec (concat default-namespaces contrib-namespaces)))
 
 (let [args *command-line-args*
       pairs (partition 2 1 args)

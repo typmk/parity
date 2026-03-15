@@ -7,31 +7,28 @@
  :parametric
  [{:describe "apropos",
    :params
-   {:str-or-pattern
-    ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   {:str-or-pattern ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.repl/apropos %str-or-pattern)"}
   {:describe "demunge",
-   :params
-   {:fn-name ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:fn-name ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.repl/demunge %fn-name)"}
   {:describe "dir",
-   :params
-   {:nsname ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:nsname ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.repl/dir %nsname)"}
   {:describe "dir-fn",
-   :params {:ns ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:ns ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.repl/dir-fn %ns)"}
   {:describe "doc",
-   :params {:name ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:name ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.repl/doc %name)"}
   {:describe "find-doc",
    :params
    {:re-string-or-pattern
-    ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+    ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.repl/find-doc %re-string-or-pattern)"}
   {:describe "pst",
    :params
-   {:e-or-depth ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   {:e-or-depth ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.repl/pst %e-or-depth)"}
   {:describe "root-cause",
    :params {:t [":a" ":b" ":foo" ":bar/baz"]},
@@ -46,10 +43,9 @@
    :params {:x ["0" "1" "-1" "42" "3.14"]},
    :template "(clojure.repl/source-fn %x)"}
   {:describe "stack-element-str",
-   :params {:el ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:el ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.repl/stack-element-str %el)"}
   {:describe "thread-stopper",
-   :params
-   {:thread ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:thread ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.repl/thread-stopper %thread)"}]}
 ]

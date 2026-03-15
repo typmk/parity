@@ -2,17 +2,16 @@
 {:category :clojure.java.javadoc.functions,
  :parametric
  [{:describe "add-local-javadoc",
-   :params {:path ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:path ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.java.javadoc/add-local-javadoc %path)"}
   {:describe "add-remote-javadoc",
    :params
-   {:package-prefix ["nil" "true" "0" "1" "-1"],
-    :url ["nil" "true" "0" "1" "-1"]},
+   {:package-prefix ["nil" "true" "false" "0" "1"],
+    :url ["nil" "true" "false" "0" "1"]},
    :template
    "(clojure.java.javadoc/add-remote-javadoc %package-prefix %url)"}
   {:describe "javadoc",
    :params
-   {:class-or-object
-    ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   {:class-or-object ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.java.javadoc/javadoc %class-or-object)"}]}
 ]

@@ -11,39 +11,43 @@
  :parametric
  [{:describe "classpath",
    :params
-   {:classloader ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   {:classloader ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.java.classpath/classpath %classloader)"}
   {:describe "filenames-in-jar",
-   :params
-   {:jar-file ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:jar-file ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.java.classpath/filenames-in-jar %jar-file)"}
   {:describe "get-urls",
-   :params
-   {:loader ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:loader ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.java.classpath/get-urls %loader)"}
   {:describe "jar-file?",
    :params
    {:val
     ["nil"
      "true"
+     "false"
      "0"
      "1"
      "-1"
      "42"
      "3.14"
+     "\"\""
      "\"hello\""
      ":a"
+     "'foo"
+     "\\a"
      "[]"
      "[1 2]"
+     "'()"
+     "'(1 2)"
+     "{}"
      "{:a 1}"
+     "#{}"
      "#{1}"]},
    :template "(clojure.java.classpath/jar-file? %val)"}
   {:describe "loader-classpath",
-   :params
-   {:loader ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:loader ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.java.classpath/loader-classpath %loader)"}
   {:describe "urls",
-   :params
-   {:loader ["nil" "true" "0" "1" "-1" "42" "3.14" "\"hello\""]},
+   :params {:loader ["nil" "true" "false" "0" "1" "-1" "42" "3.14"]},
    :template "(clojure.java.classpath/urls %loader)"}]}
 ]
