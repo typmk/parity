@@ -104,9 +104,12 @@
 ;; Dispatch
 ;; =============================================================================
 
-(let [[cmd & args] *command-line-args*]
-  (case cmd
-    "brackets" (cmd-brackets args)
-    "forms"    (cmd-forms args)
-    (do (println "Usage: par check <file...> | par forms <file>")
-        (System/exit 1))))
+(defn -main [& args]
+  (let [[cmd & cmd-args] args]
+    (case cmd
+      "brackets" (cmd-brackets cmd-args)
+      "forms"    (cmd-forms cmd-args)
+      (do (println "Usage: parity check <file...> | parity forms <file>")
+          (System/exit 1)))))
+
+(apply -main *command-line-args*)

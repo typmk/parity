@@ -1149,45 +1149,48 @@
 ;; Main
 ;; =============================================================================
 
-(let [args *command-line-args*
-      pairs (partition 2 1 args)
-      write-dir    (some #(when (= "--write" (first %)) (second %)) pairs)
-      ;; --write takes two args: lang-dir contrib-dir
-      write-args   (when write-dir
-                     (let [idx (.indexOf (vec args) "--write")]
-                       (when (< (+ idx 2) (count args))
-                         [(nth args (+ idx 1)) (nth args (+ idx 2))])))
-      lang-dir     (first write-args)
-      contrib-dir  (second write-args)
-      coverage-dir (some #(when (= "--coverage" (first %)) (second %)) pairs)
-      host-data    (some #(when (= "--host-data" (first %)) (second %)) pairs)
-      stats-only   (some #{"--stats"} args)
-      ns-args (remove #(str/starts-with? % "--") args)
-      ns-args (reduce (fn [a dir] (if dir (remove #{dir} a) a))
-                       ns-args [lang-dir contrib-dir coverage-dir host-data])
-      namespaces (if (seq ns-args) (vec ns-args) all-namespaces)]
-  (cond
-    coverage-dir
-    (let [_ (when-not host-data
-              (println "ERROR: --coverage requires --host-data <file.edn>")
-              (println "  Generate with: par deps <clojure-src> --host-edn > host.edn")
-              (System/exit 1))
-          host-results (edn/read-string (slurp host-data))
-          _ (binding [*out* *err*]
-              (println (format "specgen: loaded %d namespaces from %s" (count host-results) host-data)))]
-      (do-coverage coverage-dir host-results))
+(defn -main [& args]
+  (let [args (vec args)
+        pairs (partition 2 1 args)
+        write-dir    (some #(when (= "--write" (first %)) (second %)) pairs)
+        ;; --write takes two args: lang-dir contrib-dir
+        write-args   (when write-dir
+                       (let [idx (.indexOf args "--write")]
+                         (when (< (+ idx 2) (count args))
+                           [(nth args (+ idx 1)) (nth args (+ idx 2))])))
+        lang-dir     (first write-args)
+        contrib-dir  (second write-args)
+        coverage-dir (some #(when (= "--coverage" (first %)) (second %)) pairs)
+        host-data    (some #(when (= "--host-data" (first %)) (second %)) pairs)
+        stats-only   (some #{"--stats"} args)
+        ns-args (remove #(str/starts-with? % "--") args)
+        ns-args (reduce (fn [a dir] (if dir (remove #{dir} a) a))
+                         ns-args [lang-dir contrib-dir coverage-dir host-data])
+        namespaces (if (seq ns-args) (vec ns-args) all-namespaces)]
+    (cond
+      coverage-dir
+      (let [_ (when-not host-data
+                (println "ERROR: --coverage requires --host-data <file.edn>")
+                (println "  Generate with: par deps <clojure-src> --host-edn > host.edn")
+                (System/exit 1))
+            host-results (edn/read-string (slurp host-data))
+            _ (binding [*out* *err*]
+                (println (format "specgen: loaded %d namespaces from %s" (count host-results) host-data)))]
+        (do-coverage coverage-dir host-results))
 
-    :else
-    (let [_ (binding [*out* *err*]
-              (println (format "specgen: reflecting on %d namespaces..." (count namespaces))))
-          results (mapv process-namespace namespaces)]
-      (cond
-        stats-only  (print-stats results)
-        (and lang-dir contrib-dir)
-        (do (print-stats results)
-            (println (format "\nWriting lang specs to %s, contrib to %s:" lang-dir contrib-dir))
-            (write-specs results lang-dir contrib-dir)
-            (write-host-specs lang-dir))
-        :else       (do (print-stats results)
-                        (println "\n--- Generated Specs ---\n")
-                        (print-spec results))))))
+      :else
+      (let [_ (binding [*out* *err*]
+                (println (format "specgen: reflecting on %d namespaces..." (count namespaces))))
+            results (mapv process-namespace namespaces)]
+        (cond
+          stats-only  (print-stats results)
+          (and lang-dir contrib-dir)
+          (do (print-stats results)
+              (println (format "\nWriting lang specs to %s, contrib to %s:" lang-dir contrib-dir))
+              (write-specs results lang-dir contrib-dir)
+              (write-host-specs lang-dir))
+          :else       (do (print-stats results)
+                          (println "\n--- Generated Specs ---\n")
+                          (print-spec results)))))))
+
+(apply -main *command-line-args*)

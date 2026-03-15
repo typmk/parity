@@ -352,19 +352,22 @@
 ;; MAIN
 ;; =============================================================================
 
-(let [[cmd & args] *command-line-args*]
-  (case cmd
-    "expand"  (do-expand)
-    "capture" (do-capture)
-    "test"    (if (first args) (do-compare (first args)) (do-test))
-    "stats"   (do-stats)
-    (do
-      (println "Usage: clj -M parity.clj <command>")
-      (println)
-      (println "Commands:")
-      (println "  expand              Expand specs → expressions list")
-      (println "  capture             Eval all on JVM, save reference")
-      (println "  test                Self-check (reference vs reference)")
-      (println "  test <results.edn>  Compare platform results to reference")
-      (println "  stats               Show spec statistics")
-      (System/exit 1))))
+(defn -main [& args]
+  (let [[cmd & cmd-args] args]
+    (case cmd
+      "expand"  (do-expand)
+      "capture" (do-capture)
+      "test"    (if (first cmd-args) (do-compare (first cmd-args)) (do-test))
+      "stats"   (do-stats)
+      (do
+        (println "Usage: parity <command>")
+        (println)
+        (println "Commands:")
+        (println "  expand              Expand specs → expressions list")
+        (println "  capture             Eval all on JVM, save reference")
+        (println "  test                Self-check (reference vs reference)")
+        (println "  test <results.edn>  Compare platform results to reference")
+        (println "  stats               Show spec statistics")
+        (System/exit 1)))))
+
+(apply -main *command-line-args*)

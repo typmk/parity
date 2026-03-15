@@ -241,12 +241,15 @@
 ;; Main
 ;; =============================================================================
 
-(binding [*out* *err*] (println "langmap: collecting host data via reflection..."))
-(let [host (collect-host)
-      edn? (some #{"--edn"} *command-line-args*)
-      no-color (some #{"--no-color"} *command-line-args*)]
-  (binding [*out* *err*] (println "langmap: host data collected."))
-  (binding [*color* (not no-color)]
-    (if edn?
-      (prn host)
-      (print-langmap host))))
+(defn -main [& args]
+  (binding [*out* *err*] (println "langmap: collecting host data via reflection..."))
+  (let [host (collect-host)
+        edn? (some #{"--edn"} args)
+        no-color (some #{"--no-color"} args)]
+    (binding [*out* *err*] (println "langmap: host data collected."))
+    (binding [*color* (not no-color)]
+      (if edn?
+        (prn host)
+        (print-langmap host)))))
+
+(apply -main *command-line-args*)
