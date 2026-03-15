@@ -25,19 +25,24 @@
 (defn init
   "One-shot setup: reflect on JVM → generate specs → capture reference answers.
    Creates lang/, contrib/, and results/ directories.
+   Options: --quick (~1.5k), --balanced (default, ~5k), --thorough (~40k)
    (init)
-   (init \"lang/\" \"contrib/\")"
-  ([] (init "lang/" "contrib/"))
-  ([lang-dir contrib-dir]
-   (println "=== reflect + generate ===")
-   (load-and-call "src/parity/specgen.clj" "--write" lang-dir contrib-dir)
-   (println "\n=== expand ===")
-   (load-and-call "src/parity/parity.clj" "expand")
-   (println "\n=== capture (evaluating on JVM) ===")
-   (load-and-call "src/parity/parity.clj" "capture")
-   (println "\nDone. Reference captured in results/reference.edn")
-   (println "Ship expressions.edn to your target runtime, eval each :expr,")
-   (println "write results.edn, then run: par test results.edn")))
+   (init \"--quick\")"
+  [& args]
+  (let [tier-flags (filter #{"--quick" "--balanced" "--thorough"} args)
+        tier-flag (or (first tier-flags) "--balanced")
+        rest-args (remove #{"--quick" "--balanced" "--thorough"} args)
+        lang-dir (or (first rest-args) "lang/")
+        contrib-dir (or (second rest-args) "contrib/")]
+    (println (str "=== reflect + generate (" (subs tier-flag 2) ") ==="))
+    (load-and-call "src/parity/specgen.clj" tier-flag "--write" lang-dir contrib-dir)
+    (println "\n=== expand ===")
+    (load-and-call "src/parity/parity.clj" "expand")
+    (println "\n=== capture (evaluating on JVM) ===")
+    (load-and-call "src/parity/parity.clj" "capture")
+    (println "\nDone. Reference captured in results/reference.edn")
+    (println "Ship expressions.edn to your target runtime, eval each :expr,")
+    (println "write results.edn, then run: par test results.edn")))
 
 (defn test-impl
   "Compare target results against JVM reference.
@@ -112,6 +117,17 @@
     (load-and-call "src/parity/portabilize.clj" in-file out-file)
     (load-and-call "src/parity/portabilize.clj" in-file)))
 
+(defn clear
+  "Remove all generated files (lang/, contrib/, results/)."
+  []
+  (doseq [dir ["lang" "contrib" "results"]]
+    (let [f (io/file dir)]
+      (when (.exists f)
+        (doseq [child (reverse (file-seq f))]
+          (.delete child))
+        (println (str "  removed " dir "/")))))
+  (println "Clean."))
+
 (defn check
   "Check bracket/paren/brace balance in Clojure files."
   [& files]
@@ -131,7 +147,9 @@
   par — Clojure cross-compiler parity toolkit
 
   SETUP
-    par init                       Reflect → generate → capture reference
+    par init                       Reflect → generate → capture (~5k expressions)
+    par init --quick               Happy path only (~1.5k expressions)
+    par init --thorough            Full cross-product (~40k expressions)
 
   TEST
     par test                       Self-check (reference vs reference)
@@ -150,6 +168,9 @@
 
   REWRITE
     par port <in.clj> [out.cljc]   JVM → portable Clojure (experimental)
+
+  UTIL
+    par clear                      Remove generated files (lang/, contrib/, results/)
 "))
 
 (defn -main [& args]
@@ -163,6 +184,7 @@
       "roadmap"  (apply roadmap cmd-args)
       "coverage" (apply coverage cmd-args)
       "port"     (apply port cmd-args)
+      "clear"    (clear)
       "check"    (apply check cmd-args)
       "forms"    (apply forms cmd-args)
       (usage))))

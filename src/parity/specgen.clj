@@ -56,28 +56,74 @@
 ;; Value pools — "interesting values" for each domain
 ;; =============================================================================
 
-(def pools
-  {:nil     ["nil"]
-   :bool    ["true" "false"]
-   :int     ["0" "1" "-1" "42" "100" "Long/MAX_VALUE" "Long/MIN_VALUE"]
-   :float   ["0.0" "3.14" "-2.5" "Double/NaN" "Double/POSITIVE_INFINITY"]
-   :num     ["0" "1" "-1" "42" "3.14"]
-   :string  ["\"\"" "\"hello\"" "\"hello world\"" "\"abc\"" "\"\""]
-   :keyword [":a" ":b" ":foo" ":bar/baz"]
-   :symbol  ["'foo" "'bar" "'baz/quux"]
-   :vec     ["[]" "[1]" "[1 2 3]" "[1 2 3 4 5]" "[nil]"]
-   :map     ["{}" "{:a 1}" "{:a 1 :b 2 :c 3}" "{nil nil}"]
-   :set     ["#{}" "#{1 2 3}" "#{:a :b}" "#{{:a 1 :b 2} {:a 3 :b 4}}"]
-   :list    ["'()" "'(1 2 3)" "'(nil)"]
-   :coll    ["nil" "[]" "[1 2 3]" "'(1 2 3)" "{:a 1 :b 2}" "#{1 2 3}"]
-   :fn      ["inc" "dec" "identity" "str" "keyword"]
-   :pred    ["even?" "odd?" "nil?" "pos?" "string?"]
-   :regex   ["#\"\\\\d+\"" "#\"[a-z]+\"" "#\"hello\""]
-   :any     ["nil" "true" "false" "0" "1" "-1" "42" "3.14"
-             "\"\"" "\"hello\"" ":a" "'foo" "\\a"
-             "[]" "[1 2]" "'()" "'(1 2)" "{}" "{:a 1}" "#{}" "#{1}"]
-   :xf      ["(map inc)" "(filter even?)" "(take 3)" "(dedupe)"]
-   :char    ["\\a" "\\space" "\\newline" "\\tab"]})
+;; Granularity tiers:
+;;   :quick     — one well-typed value per arg, no cross-product (~1.5k exprs)
+;;   :balanced  — 2-3 values + nil/empty per arg, light cross-product (~5k exprs)
+;;   :thorough  — full pools, full cross-product (~40k exprs)
+
+(def ^:dynamic *tier* :balanced)
+
+(def pools-by-tier
+  {:quick
+   {:int     ["0" "42"]
+    :float   ["3.14"]
+    :num     ["0" "42"]
+    :string  ["\"hello\""]
+    :keyword [":a"]
+    :symbol  ["'foo"]
+    :vec     ["[1 2 3]"]
+    :map     ["{:a 1}"]
+    :set     ["#{1 2 3}"]
+    :list    ["'(1 2 3)"]
+    :coll    ["[1 2 3]"]
+    :fn      ["inc"]
+    :pred    ["even?"]
+    :regex   ["#\"\\\\d+\""]
+    :any     ["nil" "42" "\"hello\"" ":a" "[1 2]" "{:a 1}"]
+    :xf      ["(map inc)"]
+    :char    ["\\a"]}
+
+   :balanced
+   {:int     ["0" "1" "-1" "42"]
+    :float   ["0.0" "3.14" "-2.5"]
+    :num     ["0" "1" "-1" "42" "3.14"]
+    :string  ["\"\"" "\"hello\"" "\"hello world\""]
+    :keyword [":a" ":b" ":bar/baz"]
+    :symbol  ["'foo" "'bar/baz"]
+    :vec     ["[]" "[1 2 3]"]
+    :map     ["{}" "{:a 1}" "{:a 1 :b 2 :c 3}"]
+    :set     ["#{}" "#{1 2 3}"]
+    :list    ["'()" "'(1 2 3)"]
+    :coll    ["nil" "[]" "[1 2 3]" "{:a 1}" "#{1 2 3}"]
+    :fn      ["inc" "identity" "str"]
+    :pred    ["even?" "nil?" "string?"]
+    :regex   ["#\"\\\\d+\"" "#\"[a-z]+\""]
+    :any     ["nil" "0" "42" "3.14" "\"hello\"" ":a" "[]" "[1 2]" "{:a 1}" "#{1}"]
+    :xf      ["(map inc)" "(filter even?)"]
+    :char    ["\\a" "\\space"]}
+
+   :thorough
+   {:int     ["0" "1" "-1" "42" "100" "Long/MAX_VALUE" "Long/MIN_VALUE"]
+    :float   ["0.0" "3.14" "-2.5" "Double/NaN" "Double/POSITIVE_INFINITY"]
+    :num     ["0" "1" "-1" "42" "3.14"]
+    :string  ["\"\"" "\"hello\"" "\"hello world\"" "\"abc\""]
+    :keyword [":a" ":b" ":foo" ":bar/baz"]
+    :symbol  ["'foo" "'bar" "'baz/quux"]
+    :vec     ["[]" "[1]" "[1 2 3]" "[1 2 3 4 5]" "[nil]"]
+    :map     ["{}" "{:a 1}" "{:a 1 :b 2 :c 3}" "{nil nil}"]
+    :set     ["#{}" "#{1 2 3}" "#{:a :b}" "#{{:a 1 :b 2} {:a 3 :b 4}}"]
+    :list    ["'()" "'(1 2 3)" "'(nil)"]
+    :coll    ["nil" "[]" "[1 2 3]" "'(1 2 3)" "{:a 1 :b 2}" "#{1 2 3}"]
+    :fn      ["inc" "dec" "identity" "str" "keyword"]
+    :pred    ["even?" "odd?" "nil?" "pos?" "string?"]
+    :regex   ["#\"\\\\d+\"" "#\"[a-z]+\"" "#\"hello\""]
+    :any     ["nil" "true" "false" "0" "1" "-1" "42" "3.14"
+              "\"\"" "\"hello\"" ":a" "'foo" "\\a"
+              "[]" "[1 2]" "'()" "'(1 2)" "{}" "{:a 1}" "#{}" "#{1}"]
+    :xf      ["(map inc)" "(filter even?)" "(take 3)" "(dedupe)"]
+    :char    ["\\a" "\\space" "\\newline" "\\tab"]}})
+
+(defn pools [] (get pools-by-tier *tier*))
 
 ;; =============================================================================
 ;; Semantic categories for clojure.core vars
@@ -441,7 +487,8 @@
 (defn arg-pool
   "Pick a value pool for an argument based on its name and namespace context."
   [arg-name ns-name]
-  (let [s (str arg-name)]
+  (let [s (str arg-name)
+        p (pools)]
     (cond
       ;; Exact matches
       (= s "&")               nil  ;; skip rest marker
@@ -449,44 +496,44 @@
          "a" "b" "start" "end"
          "step" "init" "from"
          "to" "dividend" "divisor"
-         "index" "i" "j"} s)            (:num pools)
+         "index" "i" "j"} s)            (:num p)
       (#{"s" "string" "cs"
-         "substr" "replacement"} s)     (:string pools)
+         "substr" "replacement"} s)     (:string p)
       (#{"coll" "c" "c1" "c2"
-         "c3" "colls"} s)               (:coll pools)
-      (#{"f" "fn" "pred" "g"} s)        (:fn pools)
-      (#{"xform" "xf"} s)               (:xf pools)
-      (#{"k" "key"} s)                  (:keyword pools)
-      (#{"ks" "keys"} s)                (:keyword pools)
-      (#{"v" "val" "e"} s)              (:any pools)
-      (#{"m" "map" "kmap" "smap"} s)    (:map pools)
-      (#{"re" "pattern" "match"} s)     (:regex pools)
-      (#{"t" "tag"} s)                  (:keyword pools)
+         "c3" "colls"} s)               (:coll p)
+      (#{"f" "fn" "pred" "g"} s)        (:fn p)
+      (#{"xform" "xf"} s)               (:xf p)
+      (#{"k" "key"} s)                  (:keyword p)
+      (#{"ks" "keys"} s)                (:keyword p)
+      (#{"v" "val" "e"} s)              (:any p)
+      (#{"m" "map" "kmap" "smap"} s)    (:map p)
+      (#{"re" "pattern" "match"} s)     (:regex p)
+      (#{"t" "tag"} s)                  (:keyword p)
       (#{"xrel" "yrel" "xset"
-         "s1" "s2" "set1" "set2"} s)    (:set pools)
-      (#{"ch" "c"} s)                   (:char pools)
+         "s1" "s2" "set1" "set2"} s)    (:set p)
+      (#{"ch" "c"} s)                   (:char p)
 
       ;; Pattern matches
-      (str/ends-with? s "map")          (:map pools)
-      (str/ends-with? s "set")          (:set pools)
-      (str/ends-with? s "?")            (:any pools)
+      (str/ends-with? s "map")          (:map p)
+      (str/ends-with? s "set")          (:set p)
+      (str/ends-with? s "?")            (:any p)
 
       ;; Namespace context defaults
-      (= ns-name "clojure.string")      (:string pools)
-      (= ns-name "clojure.math")        (:num pools)
-      (= ns-name "clojure.set")         (:set pools)
+      (= ns-name "clojure.string")      (:string p)
+      (= ns-name "clojure.math")        (:num p)
+      (= ns-name "clojure.set")         (:set p)
 
       ;; Fallback
-      :else                              (:any pools))))
+      :else                              (:any p))))
 
 (defn limit-pool
-  "Limit pool size based on arity to prevent cross-product explosion."
+  "Limit pool size based on arity and tier."
   [pool arity]
-  (let [max-per-arg (cond
-                      (<= arity 1) 8
-                      (= arity 2)  5
-                      (= arity 3)  3
-                      :else        2)]
+  (let [limits {:quick    {1 1, 2 1, 3 1, 4 1}
+                :balanced {1 4, 2 3, 3 2, 4 2}
+                :thorough {1 8, 2 5, 3 3, 4 2}}
+        tier-limits (get limits *tier* (:balanced limits))
+        max-per-arg (get tier-limits (min arity 4) 1)]
     (vec (take max-per-arg pool))))
 
 ;; =============================================================================
@@ -658,7 +705,7 @@
                     (name sym)
                     (str ns-name "/" (name sym)))]
     {:describe (name sym)
-     :params {:val (:any pools)}
+     :params {:val (:any (pools))}
      :template (str "(" qualified " %val)")}))
 
 (defn get-edge-cases
@@ -1150,6 +1197,11 @@
 
 (defn -main [& args]
   (let [args (vec args)
+        tier (cond
+               (some #{"--quick"} args)    :quick
+               (some #{"--thorough"} args) :thorough
+               :else                       :balanced)
+        args (vec (remove #{"--quick" "--balanced" "--thorough"} args))
         pairs (partition 2 1 args)
         write-dir    (some #(when (= "--write" (first %)) (second %)) pairs)
         ;; --write takes two args: lang-dir contrib-dir
@@ -1166,6 +1218,7 @@
         ns-args (reduce (fn [a dir] (if dir (remove #{dir} a) a))
                          ns-args [lang-dir contrib-dir coverage-dir host-data])
         namespaces (if (seq ns-args) (vec ns-args) all-namespaces)]
+    (binding [*tier* tier]
     (cond
       coverage-dir
       (let [_ (when-not host-data
@@ -1190,6 +1243,6 @@
               (write-host-specs lang-dir))
           :else       (do (print-stats results)
                           (println "\n--- Generated Specs ---\n")
-                          (print-spec results)))))))
+                          (print-spec results))))))))
 
 (apply -main *command-line-args*)
