@@ -201,7 +201,7 @@
                     "TaggedLiteral" "ReaderConditional" "ArityException"]]]
           concrete-by-name (into {} (map (fn [c] [(:name c) c])) concretes)]
       (println (heading (format "TIER 4  Concrete Types (%d)" (count concretes))))
-      (println (str "  " (dim "The value types genera must provide.")))
+      (println (str "  " (dim "The value types the target must provide.")))
       (println)
       (doseq [[label names] groups]
         (let [matching (keep concrete-by-name names)]
@@ -218,7 +218,7 @@
     (println (bold (cyan "SUMMARY")))
     (println (dim (apply str (repeat 72 "─"))))
     (println)
-    (println (format "  %s things genera must implement at the native level:"
+    (println (format "  %s things the target must implement at the native level:"
                      (bold (str host-total))))
     (println)
     (println (format "    %-24s %s  %s" "Compiler specials"

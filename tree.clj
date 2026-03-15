@@ -114,7 +114,7 @@
     (println)
 
     ;; ── HOST SURFACE ─────────────────────────────────────────────────────
-    (println (heading "HOST SURFACE  (what genera must implement natively)"))
+    (println (heading "HOST SURFACE  (what the target must implement natively)"))
     (println)
 
     (println (sub-heading (format "  Interfaces (%d):" n-ifaces)))
