@@ -1,11 +1,8 @@
-#!/usr/bin/env clojure
-;; =============================================================================
-;; generate.clj — reflect on JVM, generate tests, capture reference, emit cljc
-;; =============================================================================
-
-(require '[clojure.string :as str]
-         '[clojure.java.io :as io]
-         '[clojure.edn :as edn])
+(ns parity.generate
+  "Reflect on JVM, generate tests, capture reference, emit cljc."
+  (:require [clojure.string :as str]
+            [clojure.java.io :as io]
+            [clojure.edn :as edn]))
 
 ;; Load all namespaces for reflection
 (def shipped-namespaces
@@ -68,26 +65,87 @@
    :char    {:good "\\a"}
    :any     {:good "42"       :nil "nil"   :empty "[]"}})
 
+(def tag->type
+  "Map JVM type hints to our value types. nil = untestable (skip the var)."
+  {"String" :string "CharSequence" :string "Writer" :string
+   "Number" :num "long" :num "int" :num "double" :num "float" :num "short" :num "byte" :num
+   "Boolean" :pred "boolean" :pred
+   "Object" :any
+   "Class" nil
+   "clojure.lang.IFn" :fn "clojure.lang.AFunction" :fn
+   "clojure.lang.IPersistentMap" :map "clojure.lang.Associative" :map
+   "clojure.lang.IPersistentVector" :vec
+   "clojure.lang.IPersistentSet" :set "clojure.lang.IPersistentCollection" :coll
+   "clojure.lang.ISeq" :coll "clojure.lang.Seqable" :coll
+   "clojure.lang.Sequential" :coll "clojure.lang.Counted" :coll
+   "clojure.lang.Indexed" :vec "clojure.lang.Reversible" :vec
+   "clojure.lang.Symbol" :symbol "clojure.lang.Named" :keyword
+   "clojure.lang.Keyword" :keyword
+   "clojure.lang.IObj" :any "clojure.lang.IMeta" :any
+   "java.util.regex.Pattern" :regex "java.util.regex.Matcher" :regex
+   "java.util.Comparator" :fn "java.util.Collection" :coll
+   "java.util.Map$Entry" nil
+   ;; Untestable with simple values — skip
+   "clojure.lang.Agent" nil "clojure.lang.Ref" nil "clojure.lang.Var" nil
+   "clojure.lang.IRef" nil "clojure.lang.IReference" nil
+   "clojure.lang.IAtom" nil "clojure.lang.IAtom2" nil
+   "clojure.lang.Volatile" nil "clojure.lang.IPending" nil
+   "clojure.lang.MultiFn" nil "clojure.lang.Sorted" nil
+   "clojure.lang.IEditableCollection" nil
+   "clojure.lang.ITransientCollection" nil "clojure.lang.ITransientMap" nil
+   "clojure.lang.ITransientVector" nil "clojure.lang.ITransientSet" nil
+   "clojure.lang.ITransientAssociative" nil
+   "clojure.lang.IChunkedSeq" nil "clojure.lang.ChunkBuffer" nil
+   "clojure.lang.LineNumberingPushbackReader" nil
+   "IProxy" nil "StackTraceElement" nil "Throwable" nil
+   "java.util.concurrent.Future" nil "java.util.stream.BaseStream" nil
+   "java.lang.reflect.Method" nil "java.io.BufferedReader" nil
+   "java.sql.ResultSet" nil})
+
+(defn tag-type
+  "Get value type from arglist tag metadata. Returns :skip for untestable types."
+  [arg]
+  (when-let [tag (:tag (meta arg))]
+    (let [t (str tag)]
+      (if (contains? tag->type t)
+        (let [v (get tag->type t)]
+          (if (nil? v) :skip v))
+        ;; Unknown tag — if it's a clojure.lang or java type, skip
+        (when (or (str/starts-with? t "clojure.lang.")
+                  (str/starts-with? t "java."))
+          :skip)))))
+
 (defn arg-type
-  "Infer value type from arg name and namespace context."
+  "Infer value type from tag metadata, then arg name, then namespace context."
   [arg-name ns-name]
   (let [s (str arg-name)]
     (cond
       (= s "&")                                          nil
       (#{"n" "num" "x" "y" "a" "b" "start" "end"
-         "step" "init" "from" "to" "index" "i" "j"} s)  :num
-      (#{"s" "string" "cs" "substr" "replacement"} s)    :string
-      (#{"coll" "c" "c1" "c2" "c3" "colls"} s)          :coll
-      (#{"f" "fn" "pred" "g"} s)                         :fn
+         "step" "init" "from" "to" "index" "i" "j"
+         "min" "max" "cnt" "len" "size" "depth"
+         "dividend" "divisor" "base" "exp" "val"
+         "low" "high" "p" "q" "d" "r"} s)               :num
+      (#{"s" "string" "cs" "substr" "replacement"
+         "input" "output" "line" "msg" "message"
+         "prefix" "suffix" "sep" "separator"
+         "format" "fmt" "uri" "url" "path"
+         "filename" "encoding" "name" "attr"} s)         :string
+      (#{"coll" "c" "c1" "c2" "c3" "colls"
+         "xs" "ys" "items" "l" "list" "seq"} s)          :coll
+      (#{"f" "fn" "pred" "g" "func" "action"
+         "handler" "callback"} s)                        :fn
       (#{"xform" "xf"} s)                                :xf
-      (#{"k" "key" "t" "tag"} s)                         :keyword
-      (#{"v" "val" "e"} s)                               :any
-      (#{"m" "map" "kmap" "smap"} s)                     :map
+      (#{"k" "key" "t" "tag" "type"} s)                  :keyword
+      (#{"v" "e"} s)                                     :any
+      (#{"m" "map" "kmap" "smap" "opts" "options"
+         "bindings" "env" "params" "args"} s)            :map
       (#{"re" "pattern" "match"} s)                      :regex
       (#{"xrel" "yrel" "xset" "s1" "s2"} s)             :set
       (#{"ch"} s)                                        :char
       (str/ends-with? s "map")                           :map
       (str/ends-with? s "set")                           :set
+      (str/ends-with? s "s")                             :coll
       (str/ends-with? s "?")                             :any
       (= ns-name "clojure.string")                       :string
       (= ns-name "clojure.math")                         :num
@@ -96,16 +154,21 @@
 
 (def nilable-types
   "Types where nil/empty are meaningful inputs (not just error-producing)."
-  #{:coll :vec :map :set :list :any :string})
+  #{:coll :vec :map :set :list :string})
+
+(defn effective-type
+  "Get the effective type for an arg: tag metadata first, then name-based inference."
+  [arg ns-name]
+  (or (tag-type arg) (arg-type arg ns-name)))
 
 (defn test-values-for
   "Generate test value sets for an arg: [{:label suffix :val string}]."
-  [arg-name ns-name]
-  (let [typ (arg-type arg-name ns-name)
+  [arg ns-name]
+  (let [typ (effective-type arg ns-name)
         v (get values typ (:any values))]
-    (cond-> [{:label (str arg-name) :val (:good v)}]
-      (and (:nil v) (nilable-types typ))     (conj {:label (str arg-name "=nil") :val "nil"})
-      (and (:empty v) (nilable-types typ))   (conj {:label (str arg-name "=empty") :val (:empty v)}))))
+    (cond-> [{:label (str arg) :val (:good v)}]
+      (and (:nil v) (nilable-types typ))     (conj {:label (str arg "=nil") :val "nil"})
+      (and (:empty v) (nilable-types typ))   (conj {:label (str arg "=empty") :val (:empty v)}))))
 
 ;; =============================================================================
 ;; Var classification
@@ -145,7 +208,30 @@
          make-hierarchy isa? derive underive
          eval macroexpand macroexpand-1 special-symbol? find-keyword]
        ;; Binding forms
-       '[binding with-bindings with-bindings* with-redefs with-redefs-fn]])))
+       '[binding with-bindings with-bindings* with-redefs with-redefs-fn]
+       ;; Java arrays / interop (need Java types, not Clojure values)
+       '[aclone alength aget aset amap areduce into-array to-array to-array-2d
+         make-array boolean-array byte-array char-array short-array int-array
+         long-array float-array double-array object-array booleans bytes chars
+         shorts ints longs floats doubles
+         aset-boolean aset-byte aset-char aset-double aset-float aset-int aset-long aset-short
+         .. proxy proxy-super bean add-classpath]
+       ;; Need specific JVM objects
+       '[StackTraceElement->vec Throwable->map -cache-protocol-fn
+         accessor agent-error agent-errors create-struct struct struct-map
+         set-agent-send-executor! set-agent-send-off-executor!
+         clear-agent-errors error-handler error-mode set-error-handler!
+         set-error-mode! release-pending-sends
+         alias ns-name ns-publics ns-map ns-imports ns-interns ns-refers
+         ns-aliases ns-resolve the-ns find-ns create-ns ns-loaded?
+         alter-meta! reset-meta! cast denominator numerator
+         proxy-call-with-super]
+       ;; I/O and files (need real files/streams)
+       '[file-seq line-seq xml-seq parse
+         startparse-sax source source-fn
+         pst root-cause stack-element-str]
+       ;; Opens browser / external programs
+       '[javadoc browse-url open-url-in-browser open-url-in-swing]])))
 
 (defn classify-var [sym var-meta]
   (let [nm (name sym)
@@ -176,39 +262,45 @@
         fixed-args (vec (take-while #(not= '& %) best-arity))
         arity (count fixed-args)
         has-nullary? (some #(zero? (count %)) arglists)
-        is-pred? (and (str/ends-with? (name sym) "?") (= 1 arity))]
-    (cond->
-      []
-      ;; Nullary
-      has-nullary?
-      (conj {:it (name sym) :eval (str "(" qualified ")")})
+        is-pred? (and (str/ends-with? (name sym) "?") (= 1 arity))
+        ;; Check tags — if any arg has an untestable type, skip the whole function
+        arg-tags (mapv tag-type fixed-args)
+        has-skip-tag? (some #{:skip} arg-tags)]
+    (when-not has-skip-tag?
+      (cond->
+        []
+        ;; Nullary
+        has-nullary?
+        (conj {:it (name sym) :eval (str "(" qualified ")")})
 
-      ;; Predicate: test against each type
-      is-pred?
-      (into (for [v ["nil" "true" "42" "3.14" "\"hello\"" ":a" "[1 2]" "{:a 1}" "#{1}"]]
-              {:it (str (name sym) " " v) :eval (str "(" qualified " " v ")")}))
+        ;; Predicate: test against representative types
+        is-pred?
+        (into (for [v ["nil" "true" "42" "\"hello\"" "[1 2]"]]
+                {:it (str (name sym) " " v) :eval (str "(" qualified " " v ")")}))
 
-      ;; Normal function: happy path + nil + empty per arg
-      (and (not is-pred?) (pos? arity) (<= arity 4))
-      (into
-        (let [arg-names (mapv arg-name-str fixed-args)
-              arg-test-sets (mapv #(test-values-for %1 ns-name) fixed-args)]
-          ;; Happy path: first (good) value for each arg
-          (let [happy-args (mapv #(:val (first %)) arg-test-sets)
-                happy-label (str (name sym) " " (str/join " " happy-args))]
-            (cond-> [{:it happy-label
-                      :eval (str "(" qualified " " (str/join " " happy-args) ")")}]
-              ;; Nil test: first arg = nil, rest = good
-              (and (> arity 0) (:nil (get values (arg-type (first fixed-args) ns-name))))
-              (conj (let [args (assoc happy-args 0 "nil")]
-                      {:it (str (name sym) " nil " (str/join " " (rest args)))
-                       :eval (str "(" qualified " " (str/join " " args) ")")}))
-              ;; Empty test: first arg = empty, rest = good
-              (and (> arity 0) (:empty (get values (arg-type (first fixed-args) ns-name))))
-              (conj (let [empty-val (:empty (get values (arg-type (first fixed-args) ns-name)))
-                          args (assoc happy-args 0 empty-val)]
-                      {:it (str (name sym) " " empty-val " " (str/join " " (rest args)))
-                       :eval (str "(" qualified " " (str/join " " args) ")")})))))))))
+        ;; Normal function: happy path + nil + empty per arg
+        (and (not is-pred?) (pos? arity) (<= arity 4))
+        (into
+          (let [arg-test-sets (mapv #(test-values-for % ns-name) fixed-args)]
+            ;; Happy path: first (good) value for each arg
+            (let [happy-args (mapv #(:val (first %)) arg-test-sets)
+                  happy-label (str (name sym) " " (str/join " " happy-args))]
+              (cond-> [{:it happy-label
+                        :eval (str "(" qualified " " (str/join " " happy-args) ")")}]
+                ;; Nil test: first arg = nil, rest = good (only for nilable types)
+                (let [first-type (effective-type (first fixed-args) ns-name)]
+                  (and (> arity 0) (:nil (get values first-type)) (nilable-types first-type)))
+                (conj (let [args (assoc happy-args 0 "nil")]
+                        {:it (str (name sym) " nil " (str/join " " (rest args)))
+                         :eval (str "(" qualified " " (str/join " " args) ")")}))
+                ;; Empty test: first arg = empty, rest = good (only for nilable types)
+                (let [first-type (effective-type (first fixed-args) ns-name)]
+                  (and (> arity 0) (:empty (get values first-type)) (nilable-types first-type)))
+                (conj (let [empty-val (:empty (get values (effective-type (first fixed-args) ns-name)))
+                            args (assoc happy-args 0 empty-val)]
+                        {:it (str (name sym) " " empty-val " " (str/join " " (rest args)))
+                         :eval (str "(" qualified " " (str/join " " args) ")")}))))))))))
+
 
 ;; =============================================================================
 ;; Namespace processing
@@ -327,8 +419,14 @@
                                                     (/ (- (System/currentTimeMillis) start) 1000.0)))))
                                (merge {:expr eval :category category :it it} r)))
                            exprs))
-        results (vec (mapcat deref (mapv #(future (eval-chunk %)) chunks)))
+        pool (java.util.concurrent.Executors/newFixedThreadPool *capture-threads*)
+        callables (mapv (fn [chunk] (reify java.util.concurrent.Callable
+                                      (call [_] (eval-chunk chunk))))
+                        chunks)
+        futures (.invokeAll pool callables)
+        results (vec (mapcat #(.get %) futures))
         elapsed (/ (- (System/currentTimeMillis) start) 1000.0)]
+    (.shutdown pool)
     (io/make-parents reference-file)
     (spit reference-file (pr-str results))
     (println (format "  %d results in %.1fs (%d values, %d errors)"
@@ -352,7 +450,7 @@
   (and result (not error)
        (not-any? #(str/starts-with? result %) ["#object" "#<" "#error"])
        (not (str/includes? result "..."))
-       (not (re-find #"gensym|rand|uuid|shuffle|thread-bind|elapsed|class.?loader"
+       (not (re-find #"gensym|rand|uuid|shuffle|thread-bind|elapsed|class.?loader|all-ns|loaded-libs|definterface"
                      (str/lower-case (str it))))
        (not (re-find #"java\.|clojure\.lang\." expr))))
 
@@ -450,4 +548,3 @@
         (when (and lang-dir contrib-dir)
           (write-specs results lang-dir contrib-dir))))))
 
-(apply -main *command-line-args*)

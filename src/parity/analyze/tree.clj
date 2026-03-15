@@ -14,7 +14,9 @@
 ;;   bb tree.clj <graph.edn> <host.edn>       # direct
 ;; =============================================================================
 
-(ns tree
+(ns parity.analyze.tree
+  "Merged dependency tree with host contract resolved.
+  Combines depgraph (what Clojure source uses) with langmap (what JVM provides)."
   (:require [clojure.edn :as edn]
             [clojure.string :as str]
             [parity.color :refer [bold dim green yellow cyan red white
@@ -240,23 +242,26 @@
 ;; Main
 ;; =============================================================================
 
+(defn merge-and-enrich
+  "Merge graph data with host data. Returns enriched graph."
+  [graph-data host-data]
+  (let [raw-graph (:graph graph-data)]
+    (into (sorted-map) (map (partial enrich-node host-data)) raw-graph)))
+
 (defn -main [& args]
   (let [graph-file (first (remove #(str/starts-with? % "--") args))
         host-file  (second (remove #(str/starts-with? % "--") args))
         edn-mode   (some #{"--edn"} args)
         no-color   (some #{"--no-color"} args)]
     (when (or (nil? graph-file) (nil? host-file))
-      (println "Usage: bb tree.clj <graph.edn> <host.edn> [--edn] [--no-color]")
+      (println "Usage: tree <graph.edn> <host.edn> [--edn] [--no-color]")
       (println "  graph.edn from: par deps <src> --edn")
       (println "  host.edn from:  par discover --edn")
       (System/exit 1))
     (binding [*color* (not no-color)]
       (let [graph-data (edn/read-string (slurp graph-file))
             host-data  (edn/read-string (slurp host-file))
-            raw-graph  (:graph graph-data)
-            enriched   (into (sorted-map) (map (partial enrich-node host-data)) raw-graph)]
+            enriched   (merge-and-enrich graph-data host-data)]
         (if edn-mode
           (print-edn-tree enriched host-data)
           (print-tree enriched host-data))))))
-
-(apply -main *command-line-args*)

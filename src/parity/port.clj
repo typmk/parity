@@ -18,19 +18,21 @@
 ;; Zero hardcoded tables. Everything derived from JVM reflection.
 ;; =============================================================================
 
-(ns portabilize
+(ns parity.port
+  "Rewrite JVM Clojure to portable Clojure.
+  Uses roots (JVM reflection) to discover every host dependency, then applies
+  systematic naming conventions to replace them via rewrite-clj AST walking."
   (:require [rewrite-clj.zip :as z]
             [rewrite-clj.node :as n]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [parity.analyze.roots :as roots]))
 
 ;; =============================================================================
 ;; Load host contract from roots
 ;; =============================================================================
 
 (defn load-host-contract []
-  (binding [*command-line-args* ["--edn"]]
-    (let [out (with-out-str (load-file "src/parity/analyze/roots.clj"))]
-      (read-string out))))
+  (roots/collect-host))
 
 ;; =============================================================================
 ;; Naming conventions
@@ -437,4 +439,3 @@
                    (str/replace input #"\.clj$" "_portable.cljc"))]
     (transform input output)))
 
-(apply -main *command-line-args*)

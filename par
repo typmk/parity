@@ -4,7 +4,7 @@ cd "$(dirname "$0")"
 
 # Use :contrib alias only when not --lang
 if echo "$@" | grep -q -- "--lang"; then
-  exec clojure -M src/parity/core.clj "$@"
+  exec clojure -M -m parity.core "$@"
 else
-  exec clojure -M:contrib src/parity/core.clj "$@"
+  exec clojure -M:contrib -m parity.core "$@"
 fi

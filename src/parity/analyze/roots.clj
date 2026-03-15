@@ -1,20 +1,11 @@
-#!/usr/bin/env clojure
-;; =============================================================================
-;; langmap.clj — Clojure host contract via JVM reflection
-;;
-;; What the JVM provides to Clojure: compiler specials, value protocols,
-;; runtime bridge (RT/Numbers/Util), concrete types.
-;;
-;; For source-level analysis (what .clj code uses), see depgraph.clj.
-;;
-;; Run:  par discover
-;; =============================================================================
-
-(require '[clojure.string :as str]
-         '[parity.color :refer [bold dim green yellow cyan red white
-                                heading *color*]])
-
-(import '[java.lang.reflect Modifier Method])
+(ns parity.analyze.roots
+  "Clojure host contract via JVM reflection.
+  What the JVM provides to Clojure: compiler specials, value protocols,
+  runtime bridge (RT/Numbers/Util), concrete types."
+  (:require [clojure.string :as str]
+            [parity.color :refer [bold dim green yellow cyan red white
+                                  heading *color*]])
+  (:import [java.lang.reflect Modifier Method]))
 
 ;; =============================================================================
 ;; JVM Reflection
@@ -252,4 +243,3 @@
         (prn host)
         (print-langmap host)))))
 
-(apply -main *command-line-args*)

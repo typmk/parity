@@ -1,18 +1,18 @@
 (ns parity.core
   "Clojure cross-compiler parity toolkit.
 
-  Four commands:
+  Five commands:
     init     reflect -> generate -> capture -> verify
     test     compare your results against reference
     status   dashboard + what to do next
+    port     rewrite JVM -> portable Clojure
     clear    remove generated files"
   (:require [clojure.string :as str]
             [clojure.java.io :as io]
-            [clojure.edn :as edn]))
-
-(defn- load-and-call [file & args]
-  (binding [*command-line-args* (vec args)]
-    (load-file file)))
+            [clojure.edn :as edn]
+            [parity.generate :as gen]
+            [parity.port :as port]
+            [parity.analyze :as analyze]))
 
 (def results-dir "results")
 (def expressions-file (str results-dir "/expressions.edn"))
@@ -30,79 +30,82 @@
   [reference target expressions]
   (let [ref-by-expr (into {} (map (fn [r] [(:expr r) r]) reference))
         tgt-by-expr (into {} (map (fn [r] [(:expr r) r]) target))
-        pass (atom 0) fail (atom 0) error (atom 0) missing (atom 0)
-        failures (atom [])
-        ns-pass (atom {}) ns-total (atom {})
-        current-cat (atom nil)]
-    (doseq [{:keys [it eval category ns]} expressions]
-      (when (not= @current-cat category)
-        (reset! current-cat category)
-        (println)
-        (println (name category)))
-      (swap! ns-total update ns (fnil inc 0))
-      (let [ref (get ref-by-expr eval)
-            tgt (get tgt-by-expr eval)]
-        (cond
-          (nil? tgt)
-          (do (swap! missing inc)
-              (println (str "  ? " it " — missing")))
+        init-state {:pass 0 :fail 0 :error 0 :missing 0
+                    :failures [] :ns-pass {} :ns-total {} :current-cat nil}
+        result
+        (reduce
+          (fn [state {:keys [it eval category ns]}]
+            (let [state (if (not= (:current-cat state) category)
+                          (do (println) (println (name category))
+                              (assoc state :current-cat category))
+                          state)
+                  state (update-in state [:ns-total ns] (fnil inc 0))
+                  ref (get ref-by-expr eval)
+                  tgt (get tgt-by-expr eval)]
+              (cond
+                (nil? tgt)
+                (do (println (str "  ? " it " — missing"))
+                    (update state :missing inc))
 
-          (and (:error ref) (:error tgt))
-          (if (= (:error-class ref) (:error-class tgt))
-            (do (swap! pass inc) (swap! ns-pass update ns (fnil inc 0))
-                (println (str "  \u2713 " it)))
-            (do (swap! fail inc)
-                (swap! failures conj {:it it :expr eval :expected (:error ref) :actual (:error tgt)})
-                (println (str "  \u2717 " it " — expected " (:error-class ref) " got " (:error-class tgt)))))
+                (and (:error ref) (:error tgt))
+                (if (= (:error-class ref) (:error-class tgt))
+                  (do (println (str "  \u2713 " it))
+                      (-> state (update :pass inc) (update-in [:ns-pass ns] (fnil inc 0))))
+                  (do (println (str "  \u2717 " it " — expected " (:error-class ref) " got " (:error-class tgt)))
+                      (-> state (update :fail inc)
+                          (update :failures conj {:it it :expr eval :expected (:error ref) :actual (:error tgt)}))))
 
-          (:error ref)
-          (do (swap! fail inc)
-              (swap! failures conj {:it it :expr eval :expected (str "ERROR: " (:error ref)) :actual (:result tgt)})
-              (println (str "  \u2717 " it " — expected error, got " (:result tgt))))
+                (:error ref)
+                (do (println (str "  \u2717 " it " — expected error, got " (:result tgt)))
+                    (-> state (update :fail inc)
+                        (update :failures conj {:it it :expr eval :expected (str "ERROR: " (:error ref)) :actual (:result tgt)})))
 
-          (:error tgt)
-          (do (swap! error inc)
-              (swap! failures conj {:it it :expr eval :expected (:result ref) :actual (str "ERROR: " (:error tgt))})
-              (println (str "  ! " it " — " (:error tgt))))
+                (:error tgt)
+                (do (println (str "  ! " it " — " (:error tgt)))
+                    (-> state (update :error inc)
+                        (update :failures conj {:it it :expr eval :expected (:result ref) :actual (str "ERROR: " (:error tgt))})))
 
-          (= (:result ref) (:result tgt))
-          (do (swap! pass inc) (swap! ns-pass update ns (fnil inc 0))
-              (println (str "  \u2713 " it)))
+                (= (:result ref) (:result tgt))
+                (do (println (str "  \u2713 " it))
+                    (-> state (update :pass inc) (update-in [:ns-pass ns] (fnil inc 0))))
 
-          :else
-          (do (swap! fail inc)
-              (swap! failures conj {:it it :expr eval :expected (:result ref) :actual (:result tgt)})
-              (println (str "  \u2717 " it " — expected " (:result ref) " got " (:result tgt)))))))
+                :else
+                (do (println (str "  \u2717 " it " — expected " (:result ref) " got " (:result tgt)))
+                    (-> state (update :fail inc)
+                        (update :failures conj {:it it :expr eval :expected (:result ref) :actual (:result tgt)}))))))
+          init-state
+          expressions)]
 
     ;; Per-namespace
     (println)
     (println "=== PER-NAMESPACE ===")
-    (doseq [ns-name (sort (keys @ns-total))]
-      (let [total (get @ns-total ns-name 0)
-            passed (get @ns-pass ns-name 0)]
+    (doseq [ns-name (sort (keys (:ns-total result)))]
+      (let [total (get (:ns-total result) ns-name 0)
+            passed (get (:ns-pass result) ns-name 0)]
         (println (format "  %-40s %d/%d (%.1f%%)" ns-name passed total
                          (if (pos? total) (* 100.0 (/ (double passed) total)) 0.0)))))
 
     ;; Summary
     (println)
     (println "=== PARITY REPORT ===")
-    (let [total (+ @pass @fail @error @missing)]
-      (println (format "  Pass:    %d/%d (%.1f%%)" @pass total
-                       (if (pos? total) (* 100.0 (/ (double @pass) total)) 0.0)))
-      (println (format "  Fail:    %d" @fail))
-      (println (format "  Error:   %d" @error))
-      (println (format "  Missing: %d" @missing)))
+    (let [{:keys [pass fail error missing]} result
+          total (+ pass fail error missing)]
+      (println (format "  Pass:    %d/%d (%.1f%%)" pass total
+                       (if (pos? total) (* 100.0 (/ (double pass) total)) 0.0)))
+      (println (format "  Fail:    %d" fail))
+      (println (format "  Error:   %d" error))
+      (println (format "  Missing: %d" missing)))
 
-    (when (seq @failures)
+    (when (seq (:failures result))
       (println)
       (println "--- Failures (first 20) ---")
-      (doseq [{:keys [it expr expected actual]} (take 20 @failures)]
+      (doseq [{:keys [it expr expected actual]} (take 20 (:failures result))]
         (println (str "  " it))
         (println (str "    expr:     " expr))
         (println (str "    expected: " expected))
         (println (str "    actual:   " actual))))
 
-    {:pass @pass :fail @fail :error @error :missing @missing :failures @failures}))
+    (select-keys result [:pass :fail :error :missing :failures])))
 
 ;; =============================================================================
 ;; init
@@ -127,7 +130,7 @@
                   (when (seq ns-args) (str ", " (count ns-args) " namespaces"))
                   ") ==="))
     (println)
-    (apply load-and-call "src/parity/generate.clj" "init" sg-args)
+    (apply gen/-main "init" sg-args)
     (println "\nReady.")
     (println "  Quick:    your-clojure parity.cljc")
     (println "  Detailed: par test results/results.edn")))
@@ -183,32 +186,41 @@
         (let [target (edn/read-string (slurp results-file))
               tgt-by-expr (into {} (map (fn [r] [(:expr r) r]) target))
               ref-by-expr (into {} (map (fn [r] [(:expr r) r]) ref))
-              pass (atom 0) fail (atom 0) error (atom 0) missing (atom 0)
-              ns-pass (atom {}) ns-total (atom {})]
-          (doseq [{:keys [eval ns]} exprs]
-            (let [r (get ref-by-expr eval)
-                  t (get tgt-by-expr eval)]
-              (swap! ns-total update ns (fnil inc 0))
-              (cond
-                (nil? t)                                                    (swap! missing inc)
-                (and (:error r) (:error t) (= (:error-class r) (:error-class t)))
-                (do (swap! pass inc) (swap! ns-pass update ns (fnil inc 0)))
-                (and (not (:error r)) (not (:error t)) (= (:result r) (:result t)))
-                (do (swap! pass inc) (swap! ns-pass update ns (fnil inc 0)))
-                (:error t) (swap! error inc)
-                :else      (swap! fail inc))))
+              init-state {:pass 0 :fail 0 :error 0 :missing 0
+                          :ns-pass {} :ns-total {}}
+              result
+              (reduce
+                (fn [state {:keys [eval ns]}]
+                  (let [state (update-in state [:ns-total ns] (fnil inc 0))
+                        r (get ref-by-expr eval)
+                        t (get tgt-by-expr eval)]
+                    (cond
+                      (nil? t)
+                      (update state :missing inc)
 
-          (let [total (+ @pass @fail @error @missing)]
-            (println (format "  Results: %d/%d pass (%.1f%%)" @pass total
-                             (if (pos? total) (* 100.0 (/ (double @pass) total)) 0.0)))
-            (println (format "           %d fail, %d error, %d missing" @fail @error @missing))
+                      (and (:error r) (:error t) (= (:error-class r) (:error-class t)))
+                      (-> state (update :pass inc) (update-in [:ns-pass ns] (fnil inc 0)))
+
+                      (and (not (:error r)) (not (:error t)) (= (:result r) (:result t)))
+                      (-> state (update :pass inc) (update-in [:ns-pass ns] (fnil inc 0)))
+
+                      (:error t) (update state :error inc)
+                      :else      (update state :fail inc))))
+                init-state
+                exprs)
+              {:keys [pass fail error missing ns-pass ns-total]} result]
+
+          (let [total (+ pass fail error missing)]
+            (println (format "  Results: %d/%d pass (%.1f%%)" pass total
+                             (if (pos? total) (* 100.0 (/ (double pass) total)) 0.0)))
+            (println (format "           %d fail, %d error, %d missing" fail error missing))
             (println)
 
             (println "  Per namespace:")
-            (let [ns-data (for [ns-name (sort (keys @ns-total))]
+            (let [ns-data (for [ns-name (sort (keys ns-total))]
                             {:ns ns-name
-                             :total (get @ns-total ns-name 0)
-                             :pass (get @ns-pass ns-name 0)})
+                             :total (get ns-total ns-name 0)
+                             :pass (get ns-pass ns-name 0)})
                   complete (filter #(= (:pass %) (:total %)) ns-data)
                   incomplete (sort-by #(/ (double (:pass %)) (max 1 (:total %)))
                                       (remove #(= (:pass %) (:total %)) ns-data))]
@@ -231,12 +243,12 @@
       (when (flags "--roadmap")
         (if-let [src (first positional)]
           (do (println "\n=== ROADMAP ===")
-              (load-and-call "src/parity/analyze.clj" "roadmap" src))
+              (analyze/roadmap src))
           (println "\n  --roadmap requires: par status --roadmap <clojure-src>")))
 
       (when (flags "--reflect")
         (println "\n=== JVM HOST CONTRACT ===")
-        (load-and-call "src/parity/analyze.clj" "reflect")))))
+        (analyze/reflect)))))
 
 ;; =============================================================================
 ;; clear
@@ -285,9 +297,9 @@
                  (test-impl (first cmd-args))
                  (do (println "Usage: par test <results.edn>") (System/exit 1)))
       "status" (apply status cmd-args)
-      "port"   (load-and-call "src/parity/port.clj" (first cmd-args) (second cmd-args))
+      "port"   (port/transform (first cmd-args)
+                               (or (second cmd-args)
+                                   (str/replace (first cmd-args) #"\.clj$" "_portable.cljc")))
       "clear"  (clear)
-      (usage))))
-
-(apply -main *command-line-args*)
-(System/exit 0)
+      (usage))
+))

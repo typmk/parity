@@ -4,50 +4,61 @@
   Three functions:
     reflect  — JVM class reflection (what Clojure requires from the host)
     deps     — source dependency graph (what .clj code uses)
-    roadmap  — merged priority tree (what to implement first)
-
-  Implementation modules live in analyze/ subfolder."
+    roadmap  — merged priority tree (what to implement first)"
   (:require [clojure.string :as str]
             [clojure.java.io :as io]
-            [clojure.edn :as edn]))
-
-(defn- load-and-call [file & args]
-  (binding [*command-line-args* (vec args)]
-    (load-file file)))
+            [clojure.edn :as edn]
+            [parity.analyze.roots :as roots]
+            [parity.analyze.branch :as branch]
+            [parity.analyze.tree :as tree]
+            [parity.color :refer [*color*]]))
 
 (defn reflect
   "JVM host contract: what interfaces, methods, types Clojure requires."
-  [& args]
-  (apply load-and-call "src/parity/analyze/roots.clj" (or args [])))
+  [& {:keys [edn? no-color?]}]
+  (let [host (roots/collect-host)]
+    (binding [*color* (not no-color?)]
+      (if edn?
+        (prn host)
+        (roots/print-langmap host)))))
 
 (defn deps
   "Source-level dependency graph from Clojure .clj files."
-  [& args]
-  (apply load-and-call "src/parity/analyze/branch.clj" args))
+  [input & {:keys [mode no-color?]}]
+  (binding [*color* (not no-color?)]
+    (let [{:keys [classified layers file-results]} (branch/analyze-source input)]
+      (case (or mode :summary)
+        :summary  (branch/print-summary classified layers file-results)
+        :host     (branch/print-host-contract classified)
+        :host-edn (branch/print-host-data classified)
+        :edn      (branch/print-edn classified layers file-results)
+        :dot      (branch/print-dot classified))
+      {:classified classified :layers layers :file-results file-results})))
 
 (defn roadmap
   "What to implement next. Merges source deps + JVM host contract."
-  [clojure-src & args]
-  (let [tmp-graph (java.io.File/createTempFile "parity-graph" ".edn")
-        tmp-host  (java.io.File/createTempFile "parity-host" ".edn")]
-    (try
-      (spit tmp-graph (with-out-str
-                        (load-and-call "src/parity/analyze/branch.clj" clojure-src "--edn")))
-      (spit tmp-host (with-out-str
-                       (load-and-call "src/parity/analyze/roots.clj" "--edn")))
-      (apply load-and-call "src/parity/analyze/tree.clj"
-             (str tmp-graph) (str tmp-host) args)
-      (finally
-        (.delete tmp-graph)
-        (.delete tmp-host)))))
-
-(defn -main [& args]
-  (let [[cmd & cmd-args] args]
-    (case cmd
-      "reflect" (apply reflect cmd-args)
-      "deps"    (apply deps cmd-args)
-      "roadmap" (apply roadmap cmd-args)
-      (do (println "Usage: analyze <reflect|deps|roadmap> [args...]")
-          (System/exit 1)))))
-
-(apply -main *command-line-args*)
+  [clojure-src & {:keys [edn? no-color?]}]
+  (binding [*color* (not no-color?)]
+    (let [{:keys [classified layers file-results]} (branch/analyze-source clojure-src)
+          host-data (roots/collect-host)]
+      (let [max-layer (if (empty? (vals layers)) 0 (apply max (vals layers)))
+            graph-edn {:files (count file-results)
+                       :definitions (count classified)
+                       :max-layer max-layer
+                       :graph (into (sorted-map)
+                                    (map (fn [[qn info]]
+                                           [qn {:ns (:ns info)
+                                                :name (:name info)
+                                                :kind (:kind info)
+                                                :layer (get layers qn 0)
+                                                :class (:class info)
+                                                :deps (vec (sort (:deps info)))
+                                                :dependents (:dependents info)
+                                                :host-refs (vec (sort (:host-refs info)))
+                                                :host-parsed (vec (for [p (sort-by :raw (:host-parsed info))]
+                                                                    (select-keys p [:pkg :class :member])))}]))
+                                    classified)}
+            enriched (tree/merge-and-enrich graph-edn host-data)]
+        (if edn?
+          (tree/print-edn-tree enriched host-data)
+          (tree/print-tree enriched host-data))))))

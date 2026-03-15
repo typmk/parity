@@ -22,7 +22,9 @@
 ;;   par deps /path --host                      # host contract only
 ;; =============================================================================
 
-(ns depgraph
+(ns parity.analyze.branch
+  "Source dependency graph of the Clojure language.
+  Scans .clj files, extracts definitions, resolves deps, catalogs host refs."
   (:require [rewrite-clj.zip :as z]
             [rewrite-clj.node :as n]
             [clojure.string :as str]
@@ -550,6 +552,24 @@
 ;; Main
 ;; =============================================================================
 
+(defn analyze-source
+  "Analyze source files. Returns {:classified :layers :file-results}."
+  [input]
+  (let [is-dir (.isDirectory (File. ^String input))
+        root (if is-dir input (.getParent (File. ^String input)))
+        files (if is-dir (find-clj-files input) [input])]
+    (binding [*out* *err*]
+      (println (format "depgraph: %d files in %s" (count files) input)))
+    (let [file-results (mapv #(process-file % root) files)
+          total-defs (reduce + (map (comp count :defs) file-results))
+          _ (binding [*out* *err*]
+              (println (format "  Extracted %d definitions from %d files"
+                               total-defs (count file-results))))
+          graph (build-full-graph file-results)
+          layers (assign-layers graph)
+          classified (classify graph layers)]
+      {:classified classified :layers layers :file-results file-results})))
+
 (defn -main [& args]
   (let [input (or (first (remove #(str/starts-with? % "--") args))
                   "src/clj/clojure/core.cljc")
@@ -559,29 +579,12 @@
                (some #{"--host"} args)      :host
                (some #{"--host-edn"} args)  :host-edn
                :else                        :summary)
-        no-color (some #{"--no-color"} args)
-        is-dir (.isDirectory (File. ^String input))
-        root (if is-dir input (.getParent (File. ^String input)))
-        files (if is-dir (find-clj-files input) [input])]
-
+        no-color (some #{"--no-color"} args)]
     (binding [*color* (not no-color)]
-      (binding [*out* *err*]
-        (println (format "depgraph: %d files in %s" (count files) input)))
-
-      (let [file-results (mapv #(process-file % root) files)
-            total-defs (reduce + (map (comp count :defs) file-results))
-            _ (binding [*out* *err*]
-                (println (format "  Extracted %d definitions from %d files"
-                                 total-defs (count file-results))))
-            graph (build-full-graph file-results)
-            layers (assign-layers graph)
-            classified (classify graph layers)]
-
+      (let [{:keys [classified layers file-results]} (analyze-source input)]
         (case mode
           :summary  (print-summary classified layers file-results)
           :host     (print-host-contract classified)
           :host-edn (print-host-data classified)
           :edn      (print-edn classified layers file-results)
           :dot      (print-dot classified))))))
-
-(apply -main *command-line-args*)
