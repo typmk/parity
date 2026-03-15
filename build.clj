@@ -2,7 +2,9 @@
   (:require [clojure.tools.build.api :as b]))
 
 (def lib 'io.github.typmk/parity)
-(def version (format "0.1.%s" (b/git-count-revs nil)))
+(def version
+  (or (System/getenv "RELEASE_VERSION")
+      (format "0.1.%s-SNAPSHOT" (b/git-count-revs nil))))
 (def class-dir "target/classes")
 (def jar-file (format "target/%s-%s.jar" (name lib) version))
 (def basis (delay (b/create-basis {:project "deps.edn"})))

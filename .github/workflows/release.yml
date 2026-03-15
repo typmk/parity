@@ -33,7 +33,10 @@ jobs:
         env:
           CLOJARS_USERNAME: ${{ secrets.CLOJARS_USERNAME }}
           CLOJARS_PASSWORD: ${{ secrets.CLOJARS_PASSWORD }}
-        run: clojure -T:build deploy
+          RELEASE_VERSION: ${{ github.ref_name }}
+        run: |
+          export RELEASE_VERSION="${RELEASE_VERSION#v}"
+          clojure -T:build deploy
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
