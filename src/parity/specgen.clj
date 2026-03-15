@@ -1201,7 +1201,11 @@
                (some #{"--quick"} args)    :quick
                (some #{"--thorough"} args) :thorough
                :else                       :balanced)
-        args (vec (remove #{"--quick" "--balanced" "--thorough"} args))
+        scope  (cond
+                 (some #{"--lang"} args)    :lang
+                 (some #{"--contrib"} args) :contrib
+                 :else                      :all)
+        args (vec (remove #{"--quick" "--balanced" "--thorough" "--lang" "--contrib"} args))
         pairs (partition 2 1 args)
         write-dir    (some #(when (= "--write" (first %)) (second %)) pairs)
         ;; --write takes two args: lang-dir contrib-dir
@@ -1217,7 +1221,11 @@
         ns-args (remove #(str/starts-with? % "--") args)
         ns-args (reduce (fn [a dir] (if dir (remove #{dir} a) a))
                          ns-args [lang-dir contrib-dir coverage-dir host-data])
-        namespaces (if (seq ns-args) (vec ns-args) all-namespaces)]
+        scope-ns (case scope
+                   :lang    default-namespaces
+                   :contrib contrib-namespaces
+                   :all     all-namespaces)
+        namespaces (if (seq ns-args) (vec ns-args) scope-ns)]
     (binding [*tier* tier]
     (cond
       coverage-dir

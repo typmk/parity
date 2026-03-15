@@ -147,7 +147,9 @@
               (deliver result
                 (try
                   (binding [*print-length* 100
-                            *print-level* 10]
+                            *print-level* 10
+                            *out* (java.io.StringWriter.)
+                            *err* (java.io.StringWriter.)]
                     (let [form (read-string expr-str)
                           val (eval form)
                           s (pr-str val)]
